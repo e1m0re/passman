@@ -15,3 +15,6 @@ statickcheck:
 
 generate:
 	go generate ./...
+
+migrates:
+	goose -dir db/migrations postgres "postgresql://passman:passman@127.0.0.1:5432/passman?sslmode=disable" up
