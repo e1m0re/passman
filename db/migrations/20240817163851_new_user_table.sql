@@ -4,11 +4,10 @@ SELECT 'up SQL query';
 -- +goose StatementEnd
 CREATE TABLE users
 (
-    id         SERIAL PRIMARY KEY                           NOT NULL,
-    name       VARCHAR(255)                                 NOT NULL,
-    password   VARCHAR(255)                                 NOT NULL,
-    email      VARCHAR(255)                                 NOT NULL,
-    created_ad TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC') NOT NULL
+    id       SERIAL PRIMARY KEY NOT NULL,
+    username VARCHAR(255)       NOT NULL,
+    password VARCHAR(255)       NOT NULL,
+    UNIQUE (username)
 );
 
 -- +goose Down
