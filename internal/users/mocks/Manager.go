@@ -14,9 +14,9 @@ type Manager struct {
 	mock.Mock
 }
 
-// AddUser provides a mock function with given fields: ctx, userInfo
-func (_m *Manager) AddUser(ctx context.Context, userInfo models.UserInfo) (*models.User, error) {
-	ret := _m.Called(ctx, userInfo)
+// AddUser provides a mock function with given fields: ctx, credentials
+func (_m *Manager) AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error) {
+	ret := _m.Called(ctx, credentials)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AddUser")
@@ -24,19 +24,19 @@ func (_m *Manager) AddUser(ctx context.Context, userInfo models.UserInfo) (*mode
 
 	var r0 *models.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.UserInfo) (*models.User, error)); ok {
-		return rf(ctx, userInfo)
+	if rf, ok := ret.Get(0).(func(context.Context, models.Credentials) (*models.User, error)); ok {
+		return rf(ctx, credentials)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, models.UserInfo) *models.User); ok {
-		r0 = rf(ctx, userInfo)
+	if rf, ok := ret.Get(0).(func(context.Context, models.Credentials) *models.User); ok {
+		r0 = rf(ctx, credentials)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, models.UserInfo) error); ok {
-		r1 = rf(ctx, userInfo)
+	if rf, ok := ret.Get(1).(func(context.Context, models.Credentials) error); ok {
+		r1 = rf(ctx, credentials)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -75,7 +75,7 @@ func (_m *Manager) FindUserByID(ctx context.Context, id models.UserID) (*models.
 }
 
 // FindUserByUsername provides a mock function with given fields: ctx, username
-func (_m *Manager) FindUserByUsername(ctx context.Context, username string) (*models.User, error) {
+func (_m *Manager) FindUserByUsername(ctx context.Context, username []byte) (*models.User, error) {
 	ret := _m.Called(ctx, username)
 
 	if len(ret) == 0 {
@@ -84,10 +84,10 @@ func (_m *Manager) FindUserByUsername(ctx context.Context, username string) (*mo
 
 	var r0 *models.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*models.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []byte) (*models.User, error)); ok {
 		return rf(ctx, username)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *models.User); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []byte) *models.User); ok {
 		r0 = rf(ctx, username)
 	} else {
 		if ret.Get(0) != nil {
@@ -95,7 +95,7 @@ func (_m *Manager) FindUserByUsername(ctx context.Context, username string) (*mo
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, []byte) error); ok {
 		r1 = rf(ctx, username)
 	} else {
 		r1 = ret.Error(1)

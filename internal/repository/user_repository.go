@@ -21,14 +21,14 @@ type userRepository struct {
 }
 
 // AddUser creates new user.
-func (repo userRepository) AddUser(ctx context.Context, userInfo models.UserInfo) (*models.User, error) {
+func (repo userRepository) AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error) {
 	user := &models.User{
-		Username: userInfo.Username,
-		Password: userInfo.Password,
+		Username: credentials.Username,
+		Password: credentials.Password,
 	}
 
 	query := "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id"
-	err := repo.db.QueryRowxContext(ctx, query, userInfo.Username, userInfo.Password).Scan(&user.ID)
+	err := repo.db.QueryRowxContext(ctx, query, credentials.Username, credentials.Password).Scan(&user.ID)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && err.(*pgconn.PgError).Code == "23505" {
@@ -56,7 +56,7 @@ func (repo userRepository) FindUserByID(ctx context.Context, id models.UserID) (
 }
 
 // FindUserByUsername finds and returns user instance by username or nil.
-func (repo userRepository) FindUserByUsername(ctx context.Context, username string) (*models.User, error) {
+func (repo userRepository) FindUserByUsername(ctx context.Context, username []byte) (*models.User, error) {
 	user := &models.User{}
 	query := "SELECT * FROM users WHERE username = $1 LIMIT 1"
 	err := repo.db.GetContext(ctx, user, query, username)

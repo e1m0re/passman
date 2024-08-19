@@ -9,9 +9,9 @@ import (
 //go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=UserRepository
 type UserRepository interface {
 	// AddUser creates new user.
-	AddUser(ctx context.Context, userInfo models.UserInfo) (*models.User, error)
+	AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error)
 	// FindUserByID finds and returns user instance by id or nil.
 	FindUserByID(ctx context.Context, id models.UserID) (*models.User, error)
 	// FindUserByUsername finds and returns user instance by username or nil.
-	FindUserByUsername(ctx context.Context, username string) (*models.User, error)
+	FindUserByUsername(ctx context.Context, username []byte) (*models.User, error)
 }

@@ -14,9 +14,8 @@ type usersManager struct {
 }
 
 // AddUser creates new user.
-func (um usersManager) AddUser(ctx context.Context, userInfo models.UserInfo) (*models.User, error) {
-	//TODO implement me
-	panic("implement me")
+func (um usersManager) AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error) {
+	return um.r.AddUser(ctx, credentials)
 }
 
 // FindUserByID finds and returns user instance by id or nil.
@@ -34,7 +33,7 @@ func (um usersManager) FindUserByID(ctx context.Context, id models.UserID) (*mod
 }
 
 // FindUserByUsername finds and returns user instance by username or nil.
-func (um usersManager) FindUserByUsername(ctx context.Context, username string) (*models.User, error) {
+func (um usersManager) FindUserByUsername(ctx context.Context, username []byte) (*models.User, error) {
 	user, err := um.r.FindUserByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, repository.ErrorEntityNotFound) {

@@ -4,11 +4,11 @@ type UserID int
 
 type User struct {
 	ID       UserID `db:"id"`
-	Username string `db:"username"`
-	Password string `db:"password"`
+	Username []byte `db:"username"`
+	Password []byte `db:"password"`
 }
 
-type UserInfo struct {
-	Username string `json:"login"`
-	Password string `json:"password"`
+type Credentials struct {
+	Password []byte `json:"password"`
+	Username []byte `json:"username"`
 }

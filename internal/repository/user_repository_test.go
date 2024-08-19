@@ -23,8 +23,8 @@ func Test_userRepository_AddUser(t *testing.T) {
 	defer db.Close()
 
 	type args struct {
-		ctx      context.Context
-		userInfo models.UserInfo
+		ctx         context.Context
+		credentials models.Credentials
 	}
 	type want struct {
 		user *models.User
@@ -40,9 +40,9 @@ func Test_userRepository_AddUser(t *testing.T) {
 			name: "Something wrong",
 			args: args{
 				ctx: context.Background(),
-				userInfo: models.UserInfo{
-					Username: "username",
-					Password: "password",
+				credentials: models.Credentials{
+					Username: []byte("username"),
+					Password: []byte("password"),
 				},
 			},
 			want: want{
@@ -63,9 +63,9 @@ func Test_userRepository_AddUser(t *testing.T) {
 			name: "Login is busy",
 			args: args{
 				ctx: context.Background(),
-				userInfo: models.UserInfo{
-					Username: "username",
-					Password: "password",
+				credentials: models.Credentials{
+					Username: []byte("username"),
+					Password: []byte("password"),
 				},
 			},
 			want: want{
@@ -86,16 +86,16 @@ func Test_userRepository_AddUser(t *testing.T) {
 			name: "Successfully case",
 			args: args{
 				ctx: context.Background(),
-				userInfo: models.UserInfo{
-					Username: "username",
-					Password: "password",
+				credentials: models.Credentials{
+					Username: []byte("username"),
+					Password: []byte("password"),
 				},
 			},
 			want: want{
 				user: &models.User{
 					ID:       1,
-					Username: "username",
-					Password: "password",
+					Username: []byte("username"),
+					Password: []byte("password"),
 				},
 				err: nil,
 			},
@@ -115,7 +115,7 @@ func Test_userRepository_AddUser(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repo := test.mock()
-			user, err := repo.AddUser(test.args.ctx, test.args.userInfo)
+			user, err := repo.AddUser(test.args.ctx, test.args.credentials)
 			require.Equal(t, test.want.err, err)
 			require.Equal(t, test.want.user, user)
 		})
@@ -203,8 +203,8 @@ func Test_userRepository_FindUserByID(t *testing.T) {
 			want: want{
 				user: &models.User{
 					ID:       1,
-					Username: "username",
-					Password: "password",
+					Username: []byte("username"),
+					Password: []byte("password"),
 				},
 				err: nil,
 			},
@@ -229,7 +229,7 @@ func Test_userRepository_FindUserByUsername(t *testing.T) {
 
 	type args struct {
 		ctx      context.Context
-		username string
+		username []byte
 	}
 	type want struct {
 		user *models.User
@@ -254,7 +254,7 @@ func Test_userRepository_FindUserByUsername(t *testing.T) {
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: "username",
+				username: []byte("username"),
 			},
 			want: want{
 				user: nil,
@@ -274,7 +274,7 @@ func Test_userRepository_FindUserByUsername(t *testing.T) {
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: "username",
+				username: []byte("username"),
 			},
 			want: want{
 				user: nil,
@@ -296,13 +296,13 @@ func Test_userRepository_FindUserByUsername(t *testing.T) {
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: "username",
+				username: []byte("username"),
 			},
 			want: want{
 				user: &models.User{
 					ID:       1,
-					Username: "username",
-					Password: "password",
+					Username: []byte("username"),
+					Password: []byte("password"),
 				},
 				err: nil,
 			},

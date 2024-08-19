@@ -15,6 +15,106 @@ import (
 	"e1m0re/passman/internal/users"
 )
 
+func Test_usersManager_AddUser(t *testing.T) {
+	type args struct {
+		ctx        context.Context
+		credential models.Credentials
+	}
+	type want struct {
+		user *models.User
+		err  error
+	}
+	tests := []struct {
+		name string
+		mock func() users.Manager
+		args args
+		want want
+	}{
+		{
+			name: "Something wrong",
+			mock: func() users.Manager {
+				mockUsersRepository := mocks.NewUserRepository(t)
+				mockUsersRepository.
+					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
+					Return(nil, errors.New("something wrong"))
+
+				return users.NewUsersManager(mockUsersRepository)
+			},
+			args: args{
+				ctx: context.Background(),
+				credential: models.Credentials{
+					Password: []byte("username"),
+					Username: []byte("password"),
+				},
+			},
+			want: want{
+				user: nil,
+				err:  errors.New("something wrong"),
+			},
+		},
+		{
+			name: "User not found",
+			mock: func() users.Manager {
+				mockUsersRepository := mocks.NewUserRepository(t)
+				mockUsersRepository.
+					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
+					Return(nil, repository.ErrorBusyLogin)
+
+				return users.NewUsersManager(mockUsersRepository)
+			},
+			args: args{
+				ctx: context.Background(),
+				credential: models.Credentials{
+					Password: []byte("username"),
+					Username: []byte("password"),
+				},
+			},
+			want: want{
+				user: nil,
+				err:  repository.ErrorBusyLogin,
+			},
+		},
+		{
+			name: "Successfully case",
+			mock: func() users.Manager {
+				mockUsersRepository := mocks.NewUserRepository(t)
+				mockUsersRepository.
+					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
+					Return(&models.User{
+						ID:       1,
+						Username: []byte("username"),
+						Password: []byte("password"),
+					}, nil)
+
+				return users.NewUsersManager(mockUsersRepository)
+			},
+			args: args{
+				ctx: context.Background(),
+				credential: models.Credentials{
+					Password: []byte("username"),
+					Username: []byte("password"),
+				},
+			},
+			want: want{
+				user: &models.User{
+					ID:       1,
+					Username: []byte("username"),
+					Password: []byte("password"),
+				},
+				err: nil,
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mgr := test.mock()
+			user, err := mgr.AddUser(test.args.ctx, test.args.credential)
+			assert.Equal(t, test.want.err, err)
+			assert.Equal(t, test.want.user, user)
+		})
+	}
+}
+
 func Test_usersManager_FindUserByID(t *testing.T) {
 	type args struct {
 		ctx context.Context
@@ -76,8 +176,8 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 					On("FindUserByID", mock.Anything, mock.AnythingOfType("models.UserID")).
 					Return(&models.User{
 						ID:       1,
-						Username: "username",
-						Password: "password",
+						Username: []byte("username"),
+						Password: []byte("password"),
 					}, nil)
 
 				return users.NewUsersManager(mockUsersRepository)
@@ -89,8 +189,8 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 			want: want{
 				user: &models.User{
 					ID:       1,
-					Username: "username",
-					Password: "password",
+					Username: []byte("username"),
+					Password: []byte("password"),
 				},
 				err: nil,
 			},
@@ -109,7 +209,7 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 func Test_usersManager_FindUserByUsername(t *testing.T) {
 	type args struct {
 		ctx      context.Context
-		username string
+		username []byte
 	}
 	type want struct {
 		user *models.User
@@ -126,14 +226,14 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindUserByUsername", mock.Anything, mock.AnythingOfType("string")).
+					On("FindUserByUsername", mock.Anything, []byte("username")).
 					Return(nil, errors.New("something wrong"))
 
 				return users.NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: "username",
+				username: []byte("username"),
 			},
 			want: want{
 				user: nil,
@@ -145,14 +245,14 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindUserByUsername", mock.Anything, mock.AnythingOfType("string")).
+					On("FindUserByUsername", mock.Anything, []byte("username")).
 					Return(nil, repository.ErrorEntityNotFound)
 
 				return users.NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: "username",
+				username: []byte("username"),
 			},
 			want: want{
 				user: nil,
@@ -164,24 +264,24 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindUserByUsername", mock.Anything, mock.AnythingOfType("string")).
+					On("FindUserByUsername", mock.Anything, []byte("username")).
 					Return(&models.User{
 						ID:       1,
-						Username: "username",
-						Password: "password",
+						Username: []byte("username"),
+						Password: []byte("password"),
 					}, nil)
 
 				return users.NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: "username",
+				username: []byte("username"),
 			},
 			want: want{
 				user: &models.User{
 					ID:       1,
-					Username: "username",
-					Password: "password",
+					Username: []byte("username"),
+					Password: []byte("password"),
 				},
 				err: nil,
 			},
