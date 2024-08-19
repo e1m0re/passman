@@ -1,4 +1,4 @@
-package repository
+package users
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"e1m0re/passman/internal/models"
 )
 
-//go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=UserRepository
-type UserRepository interface {
+//go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=Manager
+type Manager interface {
 	// AddUser creates new user.
 	AddUser(ctx context.Context, userInfo models.UserInfo) (*models.User, error)
 	// FindUserByID finds and returns user instance by id or nil.

@@ -15,10 +15,6 @@ import (
 	"e1m0re/passman/internal/repository"
 )
 
-var (
-	errorSomethingWrong = errors.New("something wrong")
-)
-
 func Test_userRepository_AddUser(t *testing.T) {
 	db, mock, err := sqlxmock.Newx()
 	if err != nil {
@@ -41,7 +37,7 @@ func Test_userRepository_AddUser(t *testing.T) {
 		want want
 	}{
 		{
-			name: "Login is busy",
+			name: "Something wrong",
 			args: args{
 				ctx: context.Background(),
 				userInfo: models.UserInfo{
@@ -51,14 +47,14 @@ func Test_userRepository_AddUser(t *testing.T) {
 			},
 			want: want{
 				user: nil,
-				err:  errorSomethingWrong,
+				err:  errors.New("something wrong"),
 			},
 			mock: func() repository.UserRepository {
 				repo := repository.NewUserRepository(db)
 
 				mock.
 					ExpectQuery("^INSERT INTO users \\(username, password\\) VALUES \\(\\$1, \\$2\\) RETURNING id$").
-					WillReturnError(errorSomethingWrong)
+					WillReturnError(errors.New("something wrong"))
 
 				return repo
 			},
@@ -126,7 +122,7 @@ func Test_userRepository_AddUser(t *testing.T) {
 	}
 }
 
-func Test_userRepository_FindUserById(t *testing.T) {
+func Test_userRepository_FindUserByID(t *testing.T) {
 	db, mock, err := sqlxmock.Newx()
 	if err != nil {
 		panic(err)
@@ -154,7 +150,7 @@ func Test_userRepository_FindUserById(t *testing.T) {
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users WHERE id = \\$1 LIMIT 1$").
-					WillReturnError(errorSomethingWrong)
+					WillReturnError(errors.New("something wrong"))
 
 				return repo
 			},
@@ -164,7 +160,7 @@ func Test_userRepository_FindUserById(t *testing.T) {
 			},
 			want: want{
 				user: nil,
-				err:  errorSomethingWrong,
+				err:  errors.New("something wrong"),
 			},
 		},
 		{
@@ -217,7 +213,7 @@ func Test_userRepository_FindUserById(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repo := test.mock()
-			user, err := repo.FindUserById(test.args.ctx, test.args.id)
+			user, err := repo.FindUserByID(test.args.ctx, test.args.id)
 			assert.Equal(t, test.want.err, err)
 			assert.Equal(t, test.want.user, user)
 		})
@@ -252,7 +248,7 @@ func Test_userRepository_FindUserByUsername(t *testing.T) {
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users WHERE username = \\$1 LIMIT 1$").
-					WillReturnError(errorSomethingWrong)
+					WillReturnError(errors.New("something wrong"))
 
 				return repo
 			},
@@ -262,7 +258,7 @@ func Test_userRepository_FindUserByUsername(t *testing.T) {
 			},
 			want: want{
 				user: nil,
-				err:  errorSomethingWrong,
+				err:  errors.New("something wrong"),
 			},
 		},
 		{

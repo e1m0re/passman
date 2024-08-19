@@ -1,3 +1,4 @@
 /.idea/
 /bin/
 /docs/*.drawio.bkp
+/coverage.out
