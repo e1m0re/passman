@@ -15,3 +15,7 @@ type UserRepository interface {
 	// FindUserByUsername finds and returns user instance by username or nil.
 	FindUserByUsername(ctx context.Context, username []byte) (*models.User, error)
 }
+
+//go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=UserRepository
+type PrivateDataRepository interface {
+}

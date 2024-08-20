@@ -10,6 +10,14 @@ CREATE TABLE users
     UNIQUE (username)
 );
 
+CREATE TABLE private_data
+(
+    id       SERIAL PRIMARY KEY NOT NULL,
+    "type"   INT                NOT NULL,
+    "user"   INT                NOT NULL REFERENCES users,
+    file     varchar(255)       NOT NULL,
+    checksum varchar(32)        NOT NULL
+);
 -- +goose Down
 -- +goose StatementBegin
 SELECT 'down SQL query';
