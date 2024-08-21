@@ -10,7 +10,7 @@ CREATE TABLE users
     UNIQUE (username)
 );
 
-CREATE TABLE private_data
+CREATE TABLE users_data_items
 (
     id       SERIAL PRIMARY KEY NOT NULL,
     "type"   INT                NOT NULL,

@@ -9,10 +9,17 @@ const (
 	CreditCardItem
 )
 
-type UsersDataID int
+type UsersDataItemID int
+
+type UsersDataItemInfo struct {
+	TypeID   UsersDataItemTypeID `db:"type"`
+	UserID   UserID              `db:"user"`
+	File     []byte              `db:"file"`
+	Checksum []byte              `db:"checksum"`
+}
 
 type UsersDataItem struct {
-	ID       UsersDataID         `db:"id"`
+	ID       UsersDataItemID     `db:"id"`
 	TypeID   UsersDataItemTypeID `db:"type"`
 	UserID   UserID              `db:"user"`
 	File     []byte              `db:"file"`

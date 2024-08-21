@@ -15,7 +15,7 @@ import (
 	"e1m0re/passman/internal/repository"
 )
 
-func Test_userRepository_AddUser(t *testing.T) {
+func Test_userRepository_Add(t *testing.T) {
 	db, mock, err := sqlxmock.Newx()
 	if err != nil {
 		panic(err)
@@ -115,14 +115,14 @@ func Test_userRepository_AddUser(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repo := test.mock()
-			user, err := repo.AddUser(test.args.ctx, test.args.credentials)
+			user, err := repo.Add(test.args.ctx, test.args.credentials)
 			require.Equal(t, test.want.err, err)
 			require.Equal(t, test.want.user, user)
 		})
 	}
 }
 
-func Test_userRepository_FindUserByID(t *testing.T) {
+func Test_userRepository_FindByID(t *testing.T) {
 	db, mock, err := sqlxmock.Newx()
 	if err != nil {
 		panic(err)
@@ -213,14 +213,14 @@ func Test_userRepository_FindUserByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repo := test.mock()
-			user, err := repo.FindUserByID(test.args.ctx, test.args.id)
+			user, err := repo.FindByID(test.args.ctx, test.args.id)
 			assert.Equal(t, test.want.err, err)
 			assert.Equal(t, test.want.user, user)
 		})
 	}
 }
 
-func Test_userRepository_FindUserByUsername(t *testing.T) {
+func Test_userRepository_FindByUsername(t *testing.T) {
 	db, mock, err := sqlxmock.Newx()
 	if err != nil {
 		panic(err)
@@ -311,7 +311,7 @@ func Test_userRepository_FindUserByUsername(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repo := test.mock()
-			user, err := repo.FindUserByUsername(test.args.ctx, test.args.username)
+			user, err := repo.FindByUsername(test.args.ctx, test.args.username)
 			assert.Equal(t, test.want.err, err)
 			assert.Equal(t, test.want.user, user)
 		})
