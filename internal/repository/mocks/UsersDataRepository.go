@@ -15,11 +15,11 @@ type UsersDataRepository struct {
 }
 
 // Add provides a mock function with given fields: ctx, data
-func (_m *UsersDataRepository) Add(ctx context.Context, data models.UsersDataItemInfo) (*models.UsersDataItem, error) {
+func (_m *UsersDataRepository) AddItem(ctx context.Context, data models.UsersDataItemInfo) (*models.UsersDataItem, error) {
 	ret := _m.Called(ctx, data)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Add")
+		panic("no return value specified for AddUser")
 	}
 
 	var r0 *models.UsersDataItem
@@ -45,11 +45,11 @@ func (_m *UsersDataRepository) Add(ctx context.Context, data models.UsersDataIte
 }
 
 // FindByID provides a mock function with given fields: ctx, id
-func (_m *UsersDataRepository) FindByID(ctx context.Context, id models.UsersDataItemID) (*models.UsersDataItem, error) {
+func (_m *UsersDataRepository) FindItemByID(ctx context.Context, id models.UsersDataItemID) (*models.UsersDataItem, error) {
 	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindByID")
+		panic("no return value specified for FindUserByID")
 	}
 
 	var r0 *models.UsersDataItem

@@ -15,12 +15,12 @@ type usersManager struct {
 
 // AddUser creates new user.
 func (um usersManager) AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error) {
-	return um.r.Add(ctx, credentials)
+	return um.r.AddUser(ctx, credentials)
 }
 
 // FindUserByID finds and returns user instance by id or nil.
 func (um usersManager) FindUserByID(ctx context.Context, id models.UserID) (*models.User, error) {
-	user, err := um.r.FindByID(ctx, id)
+	user, err := um.r.FindUserByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, repository.ErrorEntityNotFound) {
 			return nil, apperrors.ErrorUserNotFound
@@ -34,7 +34,7 @@ func (um usersManager) FindUserByID(ctx context.Context, id models.UserID) (*mod
 
 // FindUserByUsername finds and returns user instance by username or nil.
 func (um usersManager) FindUserByUsername(ctx context.Context, username []byte) (*models.User, error) {
-	user, err := um.r.FindByUsername(ctx, username)
+	user, err := um.r.FindUserByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, repository.ErrorEntityNotFound) {
 			return nil, apperrors.ErrorUserNotFound

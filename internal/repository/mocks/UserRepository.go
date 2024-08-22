@@ -14,12 +14,12 @@ type UserRepository struct {
 	mock.Mock
 }
 
-// Add provides a mock function with given fields: ctx, credentials
-func (_m *UserRepository) Add(ctx context.Context, credentials models.Credentials) (*models.User, error) {
+// AddItem provides a mock function with given fields: ctx, credentials
+func (_m *UserRepository) AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error) {
 	ret := _m.Called(ctx, credentials)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Add")
+		panic("no return value specified for AddUser")
 	}
 
 	var r0 *models.User
@@ -44,12 +44,12 @@ func (_m *UserRepository) Add(ctx context.Context, credentials models.Credential
 	return r0, r1
 }
 
-// FindByID provides a mock function with given fields: ctx, id
-func (_m *UserRepository) FindByID(ctx context.Context, id models.UserID) (*models.User, error) {
+// FindItemByID provides a mock function with given fields: ctx, id
+func (_m *UserRepository) FindUserByID(ctx context.Context, id models.UserID) (*models.User, error) {
 	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindByID")
+		panic("no return value specified for FindUserByID")
 	}
 
 	var r0 *models.User
@@ -75,11 +75,11 @@ func (_m *UserRepository) FindByID(ctx context.Context, id models.UserID) (*mode
 }
 
 // FindByUsername provides a mock function with given fields: ctx, username
-func (_m *UserRepository) FindByUsername(ctx context.Context, username []byte) (*models.User, error) {
+func (_m *UserRepository) FindUserByUsername(ctx context.Context, username []byte) (*models.User, error) {
 	ret := _m.Called(ctx, username)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindByUsername")
+		panic("no return value specified for FindUserByUsername")
 	}
 
 	var r0 *models.User

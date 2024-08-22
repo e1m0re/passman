@@ -15,7 +15,7 @@ type usersDataRepository struct {
 }
 
 // Add creates new users data item.
-func (repo usersDataRepository) Add(ctx context.Context, data models.UsersDataItemInfo) (*models.UsersDataItem, error) {
+func (repo usersDataRepository) AddItem(ctx context.Context, data models.UsersDataItemInfo) (*models.UsersDataItem, error) {
 	usersDataItem := &models.UsersDataItem{
 		TypeID:   data.TypeID,
 		UserID:   data.UserID,
@@ -33,7 +33,7 @@ func (repo usersDataRepository) Add(ctx context.Context, data models.UsersDataIt
 }
 
 // FindByID finds and returns users data item.
-func (repo usersDataRepository) FindByID(ctx context.Context, id models.UsersDataItemID) (*models.UsersDataItem, error) {
+func (repo usersDataRepository) FindItemByID(ctx context.Context, id models.UsersDataItemID) (*models.UsersDataItem, error) {
 	usersDataItem := &models.UsersDataItem{}
 	query := "SELECT * FROM users_data_items WHERE id = $1 LIMIT 1"
 	err := repo.db.GetContext(ctx, usersDataItem, query, id)

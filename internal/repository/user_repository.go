@@ -20,8 +20,8 @@ type userRepository struct {
 	db *sqlx.DB
 }
 
-// Add creates new user.
-func (repo userRepository) Add(ctx context.Context, credentials models.Credentials) (*models.User, error) {
+// AddItem creates new user.
+func (repo userRepository) AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error) {
 	user := &models.User{
 		Username: credentials.Username,
 		Password: credentials.Password,
@@ -40,8 +40,8 @@ func (repo userRepository) Add(ctx context.Context, credentials models.Credentia
 	return user, nil
 }
 
-// FindByID finds and returns user instance by id.
-func (repo userRepository) FindByID(ctx context.Context, id models.UserID) (*models.User, error) {
+// FindItemByID finds and returns user instance by id.
+func (repo userRepository) FindUserByID(ctx context.Context, id models.UserID) (*models.User, error) {
 	user := &models.User{}
 	query := "SELECT * FROM users WHERE id = $1 LIMIT 1"
 	err := repo.db.GetContext(ctx, user, query, id)
@@ -56,7 +56,7 @@ func (repo userRepository) FindByID(ctx context.Context, id models.UserID) (*mod
 }
 
 // FindByUsername finds and returns user instance by username.
-func (repo userRepository) FindByUsername(ctx context.Context, username []byte) (*models.User, error) {
+func (repo userRepository) FindUserByUsername(ctx context.Context, username []byte) (*models.User, error) {
 	user := &models.User{}
 	query := "SELECT * FROM users WHERE username = $1 LIMIT 1"
 	err := repo.db.GetContext(ctx, user, query, username)

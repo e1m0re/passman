@@ -97,7 +97,7 @@ func Test_usersDataRepository_Add(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repo := test.mock()
-			usersDataItem, err := repo.Add(test.args.ctx, test.args.data)
+			usersDataItem, err := repo.AddItem(test.args.ctx, test.args.data)
 			require.Equal(t, test.want.err, err)
 			require.Equal(t, test.want.usersDataItem, usersDataItem)
 		})
@@ -198,7 +198,7 @@ func Test_usersDataRepository_FindByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repo := test.mock()
-			usersDataItem, err := repo.FindByID(test.args.ctx, test.args.id)
+			usersDataItem, err := repo.FindItemByID(test.args.ctx, test.args.id)
 			assert.Equal(t, test.want.err, err)
 			assert.Equal(t, test.want.usersDataItem, usersDataItem)
 		})

@@ -35,7 +35,7 @@ func Test_usersManager_AddUser(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("Add", mock.Anything, mock.AnythingOfType("models.Credentials")).
+					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
 					Return(nil, errors.New("something wrong"))
 
 				return users.NewUsersManager(mockUsersRepository)
@@ -57,7 +57,7 @@ func Test_usersManager_AddUser(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("Add", mock.Anything, mock.AnythingOfType("models.Credentials")).
+					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
 					Return(nil, repository.ErrorBusyLogin)
 
 				return users.NewUsersManager(mockUsersRepository)
@@ -79,7 +79,7 @@ func Test_usersManager_AddUser(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("Add", mock.Anything, mock.AnythingOfType("models.Credentials")).
+					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
 					Return(&models.User{
 						ID:       1,
 						Username: []byte("username"),
@@ -135,7 +135,7 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindByID", mock.Anything, mock.AnythingOfType("models.UserID")).
+					On("FindUserByID", mock.Anything, mock.AnythingOfType("models.UserID")).
 					Return(nil, errors.New("something wrong"))
 
 				return users.NewUsersManager(mockUsersRepository)
@@ -154,7 +154,7 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindByID", mock.Anything, mock.AnythingOfType("models.UserID")).
+					On("FindUserByID", mock.Anything, mock.AnythingOfType("models.UserID")).
 					Return(nil, repository.ErrorEntityNotFound)
 
 				return users.NewUsersManager(mockUsersRepository)
@@ -173,7 +173,7 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindByID", mock.Anything, mock.AnythingOfType("models.UserID")).
+					On("FindUserByID", mock.Anything, mock.AnythingOfType("models.UserID")).
 					Return(&models.User{
 						ID:       1,
 						Username: []byte("username"),
@@ -226,7 +226,7 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindByUsername", mock.Anything, []byte("username")).
+					On("FindUserByUsername", mock.Anything, []byte("username")).
 					Return(nil, errors.New("something wrong"))
 
 				return users.NewUsersManager(mockUsersRepository)
@@ -245,7 +245,7 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindByUsername", mock.Anything, []byte("username")).
+					On("FindUserByUsername", mock.Anything, []byte("username")).
 					Return(nil, repository.ErrorEntityNotFound)
 
 				return users.NewUsersManager(mockUsersRepository)
@@ -264,7 +264,7 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 			mock: func() users.Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
-					On("FindByUsername", mock.Anything, []byte("username")).
+					On("FindUserByUsername", mock.Anything, []byte("username")).
 					Return(&models.User{
 						ID:       1,
 						Username: []byte("username"),
