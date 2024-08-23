@@ -1,12 +1,10 @@
 services:
-  web:
-    build: ./docker
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/usr/src/app
-    env_file:
-      - .env
+      - "80:80"
     depends_on:
       - db
   db:
