@@ -16,7 +16,7 @@ type listener struct {
 	server *http.Server
 }
 
-// Run starts HTTP listener.
+// Run starts listener.
 func (l *listener) Run(ctx context.Context) error {
 	grp, ctx := errgroup.WithContext(ctx)
 
@@ -38,13 +38,15 @@ func (l *listener) Run(ctx context.Context) error {
 	return grp.Wait()
 }
 
+// Shutdown stops listener.
 func (l listener) Shutdown(ctx context.Context) error {
 	return l.server.Shutdown(ctx)
 }
 
 var _ listeners.Listener = (*listener)(nil)
 
-func NewListener() listeners.Listener {
+// NewRESTListener initiates new instance of HTTP listener.
+func NewRESTListener() listeners.Listener {
 
 	handler := rest.NewHandler()
 
