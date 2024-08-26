@@ -10,6 +10,14 @@ test:
 build-server:
 	go build -o bin/server cmd/server/*go
 
+build-client:
+	cd client ;\
+	GOOS=windows GOARCH=386 go build -o ../bin/client_win_x86.exe cmd/client/main.go ;\
+	GOOS=windows GOARCH=amd64 go build -o ../bin/client_win_x64.exe cmd/client/main.go ;\
+	GOOS=linux GOARCH=amd64 go build -o ../bin/client_linux_x64 cmd/client/main.go ;\
+	GOOS=darwin GOARCH=amd64 go build -o ../bin/client_mac_x64 cmd/client/main.go ;\
+	go build -o ../bin/client_mac_arm cmd/client/main.go ;\
+
 statickcheck:
 	go run cmd/staticlint/main.go ./...
 
