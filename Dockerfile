@@ -5,7 +5,7 @@ ENV GRPC_SERVER_PORT=5000
 
 WORKDIR /go/server
 
-COPY ./server/ ./
+COPY ./ ./
 
 WORKDIR /go/server
 

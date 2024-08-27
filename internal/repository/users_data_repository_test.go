@@ -11,7 +11,6 @@ import (
 	sqlxmock "github.com/zhashkevych/go-sqlxmock"
 
 	"e1m0re/passman/internal/models"
-	"e1m0re/passman/internal/repository"
 )
 
 func Test_usersDataRepository_Add(t *testing.T) {
@@ -31,7 +30,7 @@ func Test_usersDataRepository_Add(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() repository.UsersDataRepository
+		mock func() UsersDataRepository
 		args args
 		want want
 	}{
@@ -46,8 +45,8 @@ func Test_usersDataRepository_Add(t *testing.T) {
 					Checksum: make([]byte, 0),
 				},
 			},
-			mock: func() repository.UsersDataRepository {
-				repo := repository.NewUsersDataRepository(db)
+			mock: func() UsersDataRepository {
+				repo := NewUsersDataRepository(db)
 
 				mock.
 					ExpectQuery("^INSERT INTO users_data_items \\(type, \"user\", file, checksum\\) VALUES \\(\\$1, \\$2, \\$3, \\$4\\) RETURNING id$").
@@ -71,8 +70,8 @@ func Test_usersDataRepository_Add(t *testing.T) {
 					Checksum: make([]byte, 0),
 				},
 			},
-			mock: func() repository.UsersDataRepository {
-				repo := repository.NewUsersDataRepository(db)
+			mock: func() UsersDataRepository {
+				repo := NewUsersDataRepository(db)
 
 				rows := mock.NewRows([]string{"id"}).AddRow(1)
 
@@ -121,14 +120,14 @@ func Test_usersDataRepository_FindByID(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() repository.UsersDataRepository
+		mock func() UsersDataRepository
 		args args
 		want want
 	}{
 		{
 			name: "Something wrong",
-			mock: func() repository.UsersDataRepository {
-				repo := repository.NewUsersDataRepository(db)
+			mock: func() UsersDataRepository {
+				repo := NewUsersDataRepository(db)
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users_data_items WHERE id = \\$1 LIMIT 1$").
@@ -147,8 +146,8 @@ func Test_usersDataRepository_FindByID(t *testing.T) {
 		},
 		{
 			name: "UsersDataItem not found",
-			mock: func() repository.UsersDataRepository {
-				repo := repository.NewUsersDataRepository(db)
+			mock: func() UsersDataRepository {
+				repo := NewUsersDataRepository(db)
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users_data_items WHERE id = \\$1 LIMIT 1$").
@@ -162,13 +161,13 @@ func Test_usersDataRepository_FindByID(t *testing.T) {
 			},
 			want: want{
 				usersDataItem: nil,
-				err:           repository.ErrorEntityNotFound,
+				err:           ErrorEntityNotFound,
 			},
 		},
 		{
 			name: "Successfully case",
-			mock: func() repository.UsersDataRepository {
-				repo := repository.NewUsersDataRepository(db)
+			mock: func() UsersDataRepository {
+				repo := NewUsersDataRepository(db)
 
 				rows := sqlxmock.NewRows([]string{"id", "type", "user", "file", "checksum"}).
 					AddRow("1", "1", "1", "", "")
@@ -211,6 +210,6 @@ func TestNewUsersDataRepository(t *testing.T) {
 		panic(err)
 	}
 
-	repo := repository.NewUsersDataRepository(db)
-	assert.Implements(t, (*repository.UsersDataRepository)(nil), repo)
+	repo := NewUsersDataRepository(db)
+	assert.Implements(t, (*UsersDataRepository)(nil), repo)
 }

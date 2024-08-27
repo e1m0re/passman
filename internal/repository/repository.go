@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"e1m0re/passman/internal/models"
+	"passman/server/internal/models"
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=UserRepository

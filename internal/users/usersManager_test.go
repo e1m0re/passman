@@ -12,7 +12,6 @@ import (
 	"e1m0re/passman/internal/models"
 	"e1m0re/passman/internal/repository"
 	"e1m0re/passman/internal/repository/mocks"
-	"e1m0re/passman/internal/users"
 )
 
 func Test_usersManager_AddUser(t *testing.T) {
@@ -26,19 +25,19 @@ func Test_usersManager_AddUser(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() users.Manager
+		mock func() Manager
 		args args
 		want want
 	}{
 		{
 			name: "Something wrong",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
 					Return(nil, errors.New("something wrong"))
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx: context.Background(),
@@ -54,13 +53,13 @@ func Test_usersManager_AddUser(t *testing.T) {
 		},
 		{
 			name: "User not found",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
 					Return(nil, repository.ErrorBusyLogin)
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx: context.Background(),
@@ -76,7 +75,7 @@ func Test_usersManager_AddUser(t *testing.T) {
 		},
 		{
 			name: "Successfully case",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("AddUser", mock.Anything, mock.AnythingOfType("models.Credentials")).
@@ -86,7 +85,7 @@ func Test_usersManager_AddUser(t *testing.T) {
 						Password: []byte("password"),
 					}, nil)
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx: context.Background(),
@@ -126,19 +125,19 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() users.Manager
+		mock func() Manager
 		args args
 		want want
 	}{
 		{
 			name: "Something wrong",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("FindUserByID", mock.Anything, mock.AnythingOfType("models.UserID")).
 					Return(nil, errors.New("something wrong"))
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx: context.Background(),
@@ -151,13 +150,13 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 		},
 		{
 			name: "User not found",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("FindUserByID", mock.Anything, mock.AnythingOfType("models.UserID")).
 					Return(nil, repository.ErrorEntityNotFound)
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx: context.Background(),
@@ -170,7 +169,7 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 		},
 		{
 			name: "Successfully case",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("FindUserByID", mock.Anything, mock.AnythingOfType("models.UserID")).
@@ -180,7 +179,7 @@ func Test_usersManager_FindUserByID(t *testing.T) {
 						Password: []byte("password"),
 					}, nil)
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx: context.Background(),
@@ -217,19 +216,19 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() users.Manager
+		mock func() Manager
 		args args
 		want want
 	}{
 		{
 			name: "Something wrong",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("FindUserByUsername", mock.Anything, []byte("username")).
 					Return(nil, errors.New("something wrong"))
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx:      context.Background(),
@@ -242,13 +241,13 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 		},
 		{
 			name: "User not found",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("FindUserByUsername", mock.Anything, []byte("username")).
 					Return(nil, repository.ErrorEntityNotFound)
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx:      context.Background(),
@@ -261,7 +260,7 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 		},
 		{
 			name: "Successfully case",
-			mock: func() users.Manager {
+			mock: func() Manager {
 				mockUsersRepository := mocks.NewUserRepository(t)
 				mockUsersRepository.
 					On("FindUserByUsername", mock.Anything, []byte("username")).
@@ -271,7 +270,7 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 						Password: []byte("password"),
 					}, nil)
 
-				return users.NewUsersManager(mockUsersRepository)
+				return NewUsersManager(mockUsersRepository)
 			},
 			args: args{
 				ctx:      context.Background(),
@@ -300,6 +299,6 @@ func Test_usersManager_FindUserByUsername(t *testing.T) {
 func TestNewUsersManager(t *testing.T) {
 	mockUsersRepository := mocks.NewUserRepository(t)
 
-	mgr := users.NewUsersManager(mockUsersRepository)
-	assert.Implements(t, (*users.Manager)(nil), mgr)
+	mgr := NewUsersManager(mockUsersRepository)
+	assert.Implements(t, (*Manager)(nil), mgr)
 }

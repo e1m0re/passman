@@ -12,7 +12,6 @@ import (
 	sqlxmock "github.com/zhashkevych/go-sqlxmock"
 
 	"e1m0re/passman/internal/models"
-	"e1m0re/passman/internal/repository"
 )
 
 func Test_userRepository_Add(t *testing.T) {
@@ -32,7 +31,7 @@ func Test_userRepository_Add(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() repository.UserRepository
+		mock func() UserRepository
 		args args
 		want want
 	}{
@@ -49,8 +48,8 @@ func Test_userRepository_Add(t *testing.T) {
 				user: nil,
 				err:  errors.New("something wrong"),
 			},
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				mock.
 					ExpectQuery("^INSERT INTO users \\(username, password\\) VALUES \\(\\$1, \\$2\\) RETURNING id$").
@@ -70,10 +69,10 @@ func Test_userRepository_Add(t *testing.T) {
 			},
 			want: want{
 				user: nil,
-				err:  repository.ErrorBusyLogin,
+				err:  ErrorBusyLogin,
 			},
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				mock.
 					ExpectQuery("^INSERT INTO users \\(username, password\\) VALUES \\(\\$1, \\$2\\) RETURNING id$").
@@ -99,8 +98,8 @@ func Test_userRepository_Add(t *testing.T) {
 				},
 				err: nil,
 			},
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				rows := mock.NewRows([]string{"id"}).AddRow(1)
 
@@ -139,14 +138,14 @@ func Test_userRepository_FindByID(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() repository.UserRepository
+		mock func() UserRepository
 		args args
 		want want
 	}{
 		{
 			name: "Something wrong",
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users WHERE id = \\$1 LIMIT 1$").
@@ -165,8 +164,8 @@ func Test_userRepository_FindByID(t *testing.T) {
 		},
 		{
 			name: "User not found",
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users WHERE id = \\$1 LIMIT 1$").
@@ -180,13 +179,13 @@ func Test_userRepository_FindByID(t *testing.T) {
 			},
 			want: want{
 				user: nil,
-				err:  repository.ErrorEntityNotFound,
+				err:  ErrorEntityNotFound,
 			},
 		},
 		{
 			name: "Successfully case",
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				rows := sqlxmock.NewRows([]string{"id", "username", "password"}).
 					AddRow("1", "username", "password")
@@ -237,14 +236,14 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() repository.UserRepository
+		mock func() UserRepository
 		args args
 		want want
 	}{
 		{
 			name: "Something wrong",
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users WHERE username = \\$1 LIMIT 1$").
@@ -263,8 +262,8 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 		},
 		{
 			name: "User not found",
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users WHERE username = \\$1 LIMIT 1$").
@@ -278,13 +277,13 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 			},
 			want: want{
 				user: nil,
-				err:  repository.ErrorEntityNotFound,
+				err:  ErrorEntityNotFound,
 			},
 		},
 		{
 			name: "Successfully case",
-			mock: func() repository.UserRepository {
-				repo := repository.NewUserRepository(db)
+			mock: func() UserRepository {
+				repo := NewUserRepository(db)
 
 				rows := sqlxmock.NewRows([]string{"id", "username", "password"}).
 					AddRow("1", "username", "password")
@@ -324,6 +323,6 @@ func TestNewUserRepository(t *testing.T) {
 		panic(err)
 	}
 
-	repo := repository.NewUserRepository(db)
-	assert.Implements(t, (*repository.UserRepository)(nil), repo)
+	repo := NewUserRepository(db)
+	assert.Implements(t, (*UserRepository)(nil), repo)
 }
