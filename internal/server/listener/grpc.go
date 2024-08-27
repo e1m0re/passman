@@ -16,7 +16,7 @@ type grpcListener struct {
 
 // Run starts GRPC listener.
 func (l *grpcListener) Run(ctx context.Context) error {
-	listen, err := net.Listen("tcp", ":3000")
+	listen, err := net.Listen("tcp", "0.0.0.0:3000")
 	if err != nil {
 		return err
 	}

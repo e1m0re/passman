@@ -1,6 +1,7 @@
 package file_server
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -14,7 +15,7 @@ type FileServicesServer struct {
 
 func (g *FileServicesServer) Upload(stream transfer.FileService_UploadServer) error {
 	file := NewFile()
-	fileSize := uint32(0)
+	fileSize := 0
 
 	defer func() {
 		if err := file.OutputFile.Close(); err != nil {
@@ -25,10 +26,10 @@ func (g *FileServicesServer) Upload(stream transfer.FileService_UploadServer) er
 	for {
 		req, err := stream.Recv()
 		if file.FilePath == "" {
-			file.SetFile(req.GetFileName(), "/tmp/")
+			file.SetFile(req.GetFileName(), "/Users/elmore/tmp")
 		}
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -36,14 +37,15 @@ func (g *FileServicesServer) Upload(stream transfer.FileService_UploadServer) er
 		}
 
 		chunk := req.GetChunk()
-		fileSize += uint32(len(chunk))
+		fileSize += len(chunk)
 		if err := file.Write(chunk); err != nil {
 			return err
 		}
 	}
 
 	fileName := filepath.Base(file.FilePath)
-	return stream.SendAndClose(&transfer.FileUploadResponse{FileName: fileName, Size: fileSize})
+	fmt.Printf("saved file: %s, size: %d", file.FilePath, fileSize)
+	return stream.SendAndClose(&transfer.FileUploadResponse{FileName: fileName, Size: uint32(fileSize)})
 }
 
 func NewServer() *FileServicesServer {
