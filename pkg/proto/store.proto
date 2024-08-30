@@ -1,0 +1,39 @@
+syntax = "proto3";
+package store;
+option go_package = "./store";
+
+enum ItemType {
+  CREDENTIALS = 0;
+  TEXT_DATA = 1;
+  BINARY_DATA = 2;
+  CREDIT_CARD = 3;
+}
+
+message ItemInfo {
+  string id = 1; // guid of item
+  ItemType item_type = 2; // type of item
+  string checksum = 3; // checksum of item data
+}
+
+message GetItemsListRequest {}
+
+message GetItemsListResponse {
+  repeated ItemInfo itemsInfo = 1; // items info list
+  int32 count = 2; // size of items info list
+}
+
+message UploadItemRequest {
+  string id = 1; // guid of item
+  ItemType item_type = 2; // type of item
+  bytes chunk = 3; // payload
+}
+
+message UploadItemResponse {
+  string id = 1; // guid of item
+  uint32 size = 2;
+}
+
+service Store {
+  rpc GetItemsList(GetItemsListRequest) returns(GetItemsListResponse);
+  rpc UploadItem(stream UploadItemRequest) returns(UploadItemResponse);
+}

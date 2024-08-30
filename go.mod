@@ -4,12 +4,12 @@ go 1.23.0
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/stretchr/testify v1.9.0
 	github.com/zhashkevych/go-sqlxmock v1.5.1
 	golang.org/x/crypto v0.26.0
-	golang.org/x/sync v0.8.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 )

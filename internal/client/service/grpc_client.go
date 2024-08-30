@@ -2,15 +2,15 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"io"
+	"log/slog"
 	"os"
-	"path/filepath"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	transfer "github.com/e1m0re/passman/pkg/proto"
+	store "github.com/e1m0re/passman/pkg/proto"
 )
 
 type GRPCClient interface {
@@ -22,8 +22,8 @@ type GRPCClient interface {
 }
 
 type grpcClient struct {
-	conn         *grpc.ClientConn
-	fileTransfer transfer.FileServiceClient
+	conn   *grpc.ClientConn
+	client store.StoreClient
 }
 
 // Shutdown closes connection.
@@ -31,8 +31,12 @@ func (g *grpcClient) Shutdown() error {
 	return g.conn.Close()
 }
 
-func (g *grpcClient) upload(ctx context.Context, filePath string, cancel context.CancelFunc) error {
-	stream, err := g.fileTransfer.Upload(ctx)
+// SendFile send file to server.
+func (g *grpcClient) SendFile(ctx context.Context, filePath string) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	stream, err := g.client.UploadItem(ctx)
 	if err != nil {
 		return err
 	}
@@ -54,11 +58,12 @@ func (g *grpcClient) upload(ctx context.Context, filePath string, cancel context
 		}
 
 		chunk := buf[:num]
-		if err := stream.Send(&transfer.FileUploadRequest{FileName: filepath.Base(filePath), Chunk: chunk}); err != nil {
+		id := uuid.New().String()
+		if err := stream.Send(&store.UploadItemRequest{Id: id, Chunk: chunk}); err != nil {
 			return err
 		}
 
-		batchNumber += 1
+		batchNumber++
 	}
 
 	res, err := stream.CloseAndRecv()
@@ -66,37 +71,27 @@ func (g *grpcClient) upload(ctx context.Context, filePath string, cancel context
 		return err
 	}
 
-	fmt.Printf("Sent - %v bytes - %s\n", res.GetSize(), res.GetFileName())
+	slog.Debug(
+		"sending item finished successfully",
+		slog.String("file", filePath),
+		slog.String("id", res.GetId()),
+		slog.Int("size", int(res.GetSize())),
+	)
 
 	cancel()
-	return nil
-}
-
-// SendFile send file to server.
-func (g *grpcClient) SendFile(ctx context.Context, filePath string) error {
-	ctx1, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	//go func(g *grpcClient) {
-	if err := g.upload(ctx1, filePath, cancel); err != nil {
-		fmt.Printf(err.Error())
-		cancel()
-	}
-	//}(g)
-
 	return nil
 }
 
 var _ GRPCClient = (*grpcClient)(nil)
 
 func NewGRPCClient() (GRPCClient, error) {
-	conn, err := grpc.NewClient("127.0.0.1:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("localhost:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
 
 	return &grpcClient{
-		conn:         conn,
-		fileTransfer: transfer.NewFileServiceClient(conn),
+		conn:   conn,
+		client: store.NewStoreClient(conn),
 	}, err
 }

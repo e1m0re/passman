@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,12 +17,13 @@ func main() {
 
 	grpcClient, err := service.NewGRPCClient()
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
-	err = grpcClient.SendFile(ctx, "/Users/elmore/Downloads/ideaIU-2024.2.0.2-aarch64.dmg")
+	err = grpcClient.SendFile(ctx, "/Users/elmore/Downloads/artifacts.zip")
 	if err != nil {
-		log.Fatal(err)
+		slog.WarnContext(ctx, "sync item failed", slog.String("error", err.Error()))
+		return
 	}
 
 	log.Println("file send successfully")

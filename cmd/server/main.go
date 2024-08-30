@@ -1,22 +1,30 @@
 package main
 
 import (
-	"context"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
+	"github.com/e1m0re/passman/internal/server"
+	"log/slog"
 
-	"github.com/e1m0re/passman/internal/server/listener"
+	googleGrpc "google.golang.org/grpc"
+
+	grpcCtrl "github.com/e1m0re/passman/internal/controller/grpc"
+	"github.com/e1m0re/passman/internal/server/grpc"
+	store "github.com/e1m0re/passman/pkg/proto"
 )
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
-	defer cancel()
 
-	srv, _ := listener.NewGRPCListener()
-	err := srv.Run(ctx)
+	storeController := grpcCtrl.NewStoreController()
+
+	grpcServer, err := grpc.NewGRPCServer()
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("failed initiates GRPC server", slog.String("error", err.Error()))
+		return
 	}
+
+	go grpcServer.Start(
+		func(server *googleGrpc.Server) {
+			store.RegisterStoreServer(server, storeController)
+		})
+
+	server.AddShutdownHook(grpcServer)
 }
