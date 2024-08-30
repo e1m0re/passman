@@ -34,7 +34,7 @@ message UploadItemResponse {
 }
 
 message DownloadItemRequest {
-  string id = 1; // guid of item
+  string guid = 1; // guid of item
 }
 
 message DownloadItemResponse {

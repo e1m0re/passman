@@ -2,18 +2,32 @@ package main
 
 import (
 	"log/slog"
+	"os"
 
 	googleGrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
 	grpcCtrl "github.com/e1m0re/passman/internal/controller/grpc"
+	"github.com/e1m0re/passman/internal/repository"
 	"github.com/e1m0re/passman/internal/server"
 	"github.com/e1m0re/passman/internal/server/grpc"
-	store "github.com/e1m0re/passman/pkg/proto"
+	"github.com/e1m0re/passman/internal/service/db"
+	"github.com/e1m0re/passman/internal/service/store"
+	proto "github.com/e1m0re/passman/pkg/proto"
 )
 
 func main() {
-	storeController := grpcCtrl.NewStoreController("/Users/elmore/passman/server")
+	dbService, err := db.NewDBService(db.DatabaseConfig{
+		Driver:                  "pgx",
+		Url:                     os.Getenv("DATABASE_DSN"),
+		ConnMaxLifetimeInMinute: 3,
+		MaxOpenConnections:      10,
+		MaxIdleConnections:      1,
+	})
+	if err != nil {
+		slog.Error("database connection failed", slog.String("error", err.Error()))
+		return
+	}
 
 	grpcServer, err := grpc.NewGRPCServer(&grpc.Config{
 		Port: 3000,
@@ -34,10 +48,14 @@ func main() {
 		return
 	}
 
+	datumRepository := repository.NewDatumRepository(dbService)
+	storeService := store.NewStoreService(datumRepository)
+	storeController := grpcCtrl.NewStoreController("/Users/elmore/passman/server", storeService)
+
 	go grpcServer.Start(
 		func(server *googleGrpc.Server) {
-			store.RegisterStoreServer(server, storeController)
+			proto.RegisterStoreServer(server, storeController)
 		})
 
-	server.AddShutdownHook(grpcServer)
+	server.AddShutdownHook(grpcServer, dbService)
 }

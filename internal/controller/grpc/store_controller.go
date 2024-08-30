@@ -8,21 +8,24 @@ import (
 	"os"
 	"path/filepath"
 
-	store "github.com/e1m0re/passman/pkg/proto"
+	"github.com/e1m0re/passman/internal/service/store"
+	proto "github.com/e1m0re/passman/pkg/proto"
 )
 
 type storeController struct {
-	store.UnimplementedStoreServer
-	workDir string
+	storeService store.StoreService
+	workDir      string
+
+	proto.UnimplementedStoreServer
 }
 
-func (s *storeController) GetItemsList(ctx context.Context, request *store.GetItemsListRequest) (*store.GetItemsListResponse, error) {
+func (s *storeController) GetItemsList(ctx context.Context, request *proto.GetItemsListRequest) (*proto.GetItemsListResponse, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
 // UploadItem contains the logic for uploading a file to the server.
-func (s *storeController) UploadItem(stream store.Store_UploadItemServer) error {
+func (s *storeController) UploadItem(stream proto.Store_UploadItemServer) error {
 	file := NewFile()
 	fileSize := uint32(0)
 
@@ -58,12 +61,12 @@ func (s *storeController) UploadItem(stream store.Store_UploadItemServer) error 
 	fileName := filepath.Base(file.FilePath)
 	slog.Info("getting data finished successfully", slog.String("file", file.FilePath), slog.Int("size", int(fileSize)))
 
-	return stream.SendAndClose(&store.UploadItemResponse{Id: fileName, Size: fileSize})
+	return stream.SendAndClose(&proto.UploadItemResponse{Id: fileName, Size: fileSize})
 }
 
 // DownloadItem contains the logic for downloading a file from the server.
-func (s *storeController) DownloadItem(req *store.DownloadItemRequest, stream store.Store_DownloadItemServer) error {
-	id := req.GetId()
+func (s *storeController) DownloadItem(req *proto.DownloadItemRequest, stream proto.Store_DownloadItemServer) error {
+	id := req.GetGuid()
 	path := filepath.Join(s.workDir, id)
 
 	fileInfo, err := os.Stat(path)
@@ -90,7 +93,7 @@ func (s *storeController) DownloadItem(req *store.DownloadItemRequest, stream st
 			return err
 		}
 
-		if err := stream.Send(&store.DownloadItemResponse{Payload: data}); err != nil {
+		if err := stream.Send(&proto.DownloadItemResponse{Payload: data}); err != nil {
 			return err
 		}
 
@@ -100,11 +103,12 @@ func (s *storeController) DownloadItem(req *store.DownloadItemRequest, stream st
 	return nil
 }
 
-var _ store.StoreServer = (*storeController)(nil)
+var _ proto.StoreServer = (*storeController)(nil)
 
 // NewStoreController initiates new instance of StoreServer.
-func NewStoreController(workDir string) store.StoreServer {
+func NewStoreController(workDir string, storeService store.StoreService) proto.StoreServer {
 	return &storeController{
-		workDir: workDir,
+		storeService: storeService,
+		workDir:      workDir,
 	}
 }

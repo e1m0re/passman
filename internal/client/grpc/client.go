@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	store "github.com/e1m0re/passman/pkg/proto"
+	proto "github.com/e1m0re/passman/pkg/proto"
 )
 
 type GRPCClient interface {
@@ -30,7 +30,7 @@ type GRPCClient interface {
 type grpcClient struct {
 	config     *ClientConfig
 	connection *grpc.ClientConn
-	client     store.StoreClient
+	client     proto.StoreClient
 }
 
 // Shutdown closes connection.
@@ -43,7 +43,7 @@ func (g *grpcClient) UploadItem(ctx context.Context, id string) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	filePath := filepath.Join(g.config.WorkDir, id)
+	filePath := filepath.Join(g.config.workDir, id)
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func (g *grpcClient) UploadItem(ctx context.Context, id string) error {
 
 		chunk := buf[:num]
 		id := uuid.New().String()
-		if err := stream.Send(&store.UploadItemRequest{Id: id, Chunk: chunk}); err != nil {
+		if err := stream.Send(&proto.UploadItemRequest{Id: id, Chunk: chunk}); err != nil {
 			return err
 		}
 
@@ -92,8 +92,8 @@ func (g *grpcClient) UploadItem(ctx context.Context, id string) error {
 
 // DownloadItem gets file from server.
 func (g *grpcClient) DownloadItem(ctx context.Context, id string) error {
-	req := &store.DownloadItemRequest{
-		Id: id,
+	req := &proto.DownloadItemRequest{
+		Guid: id,
 	}
 
 	stream, err := g.client.DownloadItem(ctx, req)
@@ -101,7 +101,7 @@ func (g *grpcClient) DownloadItem(ctx context.Context, id string) error {
 		return err
 	}
 
-	filePath := filepath.Join(g.config.WorkDir, id)
+	filePath := filepath.Join(g.config.workDir, id)
 	var downloaded int64
 	var buffer bytes.Buffer
 
@@ -140,6 +140,6 @@ func NewGRPCClient(cfg *ClientConfig) (GRPCClient, error) {
 	return &grpcClient{
 		config:     cfg,
 		connection: conn,
-		client:     store.NewStoreClient(conn),
+		client:     proto.NewStoreClient(conn),
 	}, err
 }

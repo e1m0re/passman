@@ -4,11 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/e1m0re/passman/internal/models"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
-
-	"e1m0re/passman/internal/models"
 )
 
 var (

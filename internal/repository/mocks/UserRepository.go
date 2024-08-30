@@ -4,8 +4,8 @@ package mocks
 
 import (
 	context "context"
-	models "e1m0re/passman/internal/models"
 
+	models "github.com/e1m0re/passman/internal/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -14,7 +14,7 @@ type UserRepository struct {
 	mock.Mock
 }
 
-// AddItem provides a mock function with given fields: ctx, credentials
+// AddUser provides a mock function with given fields: ctx, credentials
 func (_m *UserRepository) AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error) {
 	ret := _m.Called(ctx, credentials)
 
@@ -44,7 +44,7 @@ func (_m *UserRepository) AddUser(ctx context.Context, credentials models.Creden
 	return r0, r1
 }
 
-// FindItemByID provides a mock function with given fields: ctx, id
+// FindUserByID provides a mock function with given fields: ctx, id
 func (_m *UserRepository) FindUserByID(ctx context.Context, id models.UserID) (*models.User, error) {
 	ret := _m.Called(ctx, id)
 
@@ -74,7 +74,7 @@ func (_m *UserRepository) FindUserByID(ctx context.Context, id models.UserID) (*
 	return r0, r1
 }
 
-// FindByUsername provides a mock function with given fields: ctx, username
+// FindUserByUsername provides a mock function with given fields: ctx, username
 func (_m *UserRepository) FindUserByUsername(ctx context.Context, username []byte) (*models.User, error) {
 	ret := _m.Called(ctx, username)
 
