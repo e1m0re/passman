@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"os"
 	"path/filepath"
 
 	store "github.com/e1m0re/passman/pkg/proto"
@@ -56,6 +57,44 @@ func (s *storeController) UploadItem(stream store.Store_UploadItemServer) error 
 	slog.Info("getting data finished successfully", slog.String("file", file.FilePath), slog.Int("size", int(fileSize)))
 
 	return stream.SendAndClose(&store.UploadItemResponse{Id: fileName, Size: fileSize})
+}
+
+func (s *storeController) DownloadItem(req *store.DownloadItemRequest, stream store.Store_DownloadItemServer) error {
+	id := req.GetId()
+	path := filepath.Join("/Users/elmore/passman/server", id)
+
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+	fileSize := fileInfo.Size()
+
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	totalBytesStreamed := int64(0)
+	for totalBytesStreamed < fileSize {
+		data := make([]byte, 1024)
+		bytesRead, err := f.Read(data)
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		if err := stream.Send(&store.DownloadItemResponse{Payload: data}); err != nil {
+			return err
+		}
+
+		totalBytesStreamed += int64(bytesRead)
+	}
+
+	return nil
 }
 
 var _ store.StoreServer = (*storeController)(nil)

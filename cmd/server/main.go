@@ -1,18 +1,17 @@
 package main
 
 import (
-	"github.com/e1m0re/passman/internal/server"
 	"log/slog"
 
 	googleGrpc "google.golang.org/grpc"
 
 	grpcCtrl "github.com/e1m0re/passman/internal/controller/grpc"
+	"github.com/e1m0re/passman/internal/server"
 	"github.com/e1m0re/passman/internal/server/grpc"
 	store "github.com/e1m0re/passman/pkg/proto"
 )
 
 func main() {
-
 	storeController := grpcCtrl.NewStoreController()
 
 	grpcServer, err := grpc.NewGRPCServer()

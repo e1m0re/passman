@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"log/slog"
@@ -17,8 +18,11 @@ type GRPCClient interface {
 	// Shutdown closes connection.
 	Shutdown() error
 
-	// SendFile send file to server.
-	SendFile(ctx context.Context, filePath string) error
+	// UploadItem send file to server.
+	UploadItem(ctx context.Context, filePath string) error
+
+	// DownloadItem gets file from server.
+	DownloadItem(ctx context.Context, id string) error
 }
 
 type grpcClient struct {
@@ -31,8 +35,8 @@ func (g *grpcClient) Shutdown() error {
 	return g.conn.Close()
 }
 
-// SendFile send file to server.
-func (g *grpcClient) SendFile(ctx context.Context, filePath string) error {
+// UploadItem send file to server.
+func (g *grpcClient) UploadItem(ctx context.Context, filePath string) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -79,6 +83,43 @@ func (g *grpcClient) SendFile(ctx context.Context, filePath string) error {
 	)
 
 	cancel()
+	return nil
+}
+
+func (g *grpcClient) DownloadItem(ctx context.Context, id string) error {
+	req := &store.DownloadItemRequest{
+		Id: id,
+	}
+
+	stream, err := g.client.DownloadItem(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	fileName := "/Users/elmore/passman/client/" + id
+	var downloaded int64
+	var buffer bytes.Buffer
+
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			if err := os.WriteFile(fileName, buffer.Bytes(), 0777); err != nil {
+				return err
+			}
+			break
+		}
+		if err != nil {
+			buffer.Reset()
+			return err
+		}
+
+		payload := res.GetPayload()
+		size := len(payload)
+		downloaded += int64(size)
+
+		buffer.Write(payload)
+	}
+
 	return nil
 }
 

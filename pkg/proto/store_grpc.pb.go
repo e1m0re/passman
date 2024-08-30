@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Store_GetItemsList_FullMethodName = "/store.Store/GetItemsList"
 	Store_UploadItem_FullMethodName   = "/store.Store/UploadItem"
+	Store_DownloadItem_FullMethodName = "/store.Store/DownloadItem"
 )
 
 // StoreClient is the client API for Store service.
@@ -29,6 +30,7 @@ const (
 type StoreClient interface {
 	GetItemsList(ctx context.Context, in *GetItemsListRequest, opts ...grpc.CallOption) (*GetItemsListResponse, error)
 	UploadItem(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadItemRequest, UploadItemResponse], error)
+	DownloadItem(ctx context.Context, in *DownloadItemRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DownloadItemResponse], error)
 }
 
 type storeClient struct {
@@ -62,12 +64,32 @@ func (c *storeClient) UploadItem(ctx context.Context, opts ...grpc.CallOption) (
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Store_UploadItemClient = grpc.ClientStreamingClient[UploadItemRequest, UploadItemResponse]
 
+func (c *storeClient) DownloadItem(ctx context.Context, in *DownloadItemRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DownloadItemResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Store_ServiceDesc.Streams[1], Store_DownloadItem_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[DownloadItemRequest, DownloadItemResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Store_DownloadItemClient = grpc.ServerStreamingClient[DownloadItemResponse]
+
 // StoreServer is the server API for Store service.
 // All implementations must embed UnimplementedStoreServer
 // for forward compatibility.
 type StoreServer interface {
 	GetItemsList(context.Context, *GetItemsListRequest) (*GetItemsListResponse, error)
 	UploadItem(grpc.ClientStreamingServer[UploadItemRequest, UploadItemResponse]) error
+	DownloadItem(*DownloadItemRequest, grpc.ServerStreamingServer[DownloadItemResponse]) error
 	mustEmbedUnimplementedStoreServer()
 }
 
@@ -83,6 +105,9 @@ func (UnimplementedStoreServer) GetItemsList(context.Context, *GetItemsListReque
 }
 func (UnimplementedStoreServer) UploadItem(grpc.ClientStreamingServer[UploadItemRequest, UploadItemResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method UploadItem not implemented")
+}
+func (UnimplementedStoreServer) DownloadItem(*DownloadItemRequest, grpc.ServerStreamingServer[DownloadItemResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method DownloadItem not implemented")
 }
 func (UnimplementedStoreServer) mustEmbedUnimplementedStoreServer() {}
 func (UnimplementedStoreServer) testEmbeddedByValue()               {}
@@ -130,6 +155,17 @@ func _Store_UploadItem_Handler(srv interface{}, stream grpc.ServerStream) error 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Store_UploadItemServer = grpc.ClientStreamingServer[UploadItemRequest, UploadItemResponse]
 
+func _Store_DownloadItem_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(DownloadItemRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(StoreServer).DownloadItem(m, &grpc.GenericServerStream[DownloadItemRequest, DownloadItemResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Store_DownloadItemServer = grpc.ServerStreamingServer[DownloadItemResponse]
+
 // Store_ServiceDesc is the grpc.ServiceDesc for Store service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -147,6 +183,11 @@ var Store_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "UploadItem",
 			Handler:       _Store_UploadItem_Handler,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "DownloadItem",
+			Handler:       _Store_DownloadItem_Handler,
+			ServerStreams: true,
 		},
 	},
 	Metadata: "pkg/proto/store.proto",

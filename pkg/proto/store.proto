@@ -30,10 +30,19 @@ message UploadItemRequest {
 
 message UploadItemResponse {
   string id = 1; // guid of item
-  uint32 size = 2;
+  uint32 size = 2; // size of received data
+}
+
+message DownloadItemRequest {
+  string id = 1; // guid of item
+}
+
+message DownloadItemResponse {
+  bytes payload = 1;
 }
 
 service Store {
   rpc GetItemsList(GetItemsListRequest) returns(GetItemsListResponse);
   rpc UploadItem(stream UploadItemRequest) returns(UploadItemResponse);
+  rpc DownloadItem(DownloadItemRequest) returns(stream DownloadItemResponse);
 }
