@@ -13,6 +13,7 @@ import (
 
 type storeController struct {
 	store.UnimplementedStoreServer
+	workDir string
 }
 
 func (s *storeController) GetItemsList(ctx context.Context, request *store.GetItemsListRequest) (*store.GetItemsListResponse, error) {
@@ -20,6 +21,7 @@ func (s *storeController) GetItemsList(ctx context.Context, request *store.GetIt
 	panic("implement me")
 }
 
+// UploadItem contains the logic for uploading a file to the server.
 func (s *storeController) UploadItem(stream store.Store_UploadItemServer) error {
 	file := NewFile()
 	fileSize := uint32(0)
@@ -33,7 +35,7 @@ func (s *storeController) UploadItem(stream store.Store_UploadItemServer) error 
 	for {
 		req, err := stream.Recv()
 		if file.FilePath == "" {
-			err = file.SetFile(req.GetId(), "/Users/elmore/tmp")
+			err = file.SetFile(req.GetId(), s.workDir)
 			if err != nil {
 				slog.Warn("preparing file failed", slog.String("error", err.Error()))
 			}
@@ -59,9 +61,10 @@ func (s *storeController) UploadItem(stream store.Store_UploadItemServer) error 
 	return stream.SendAndClose(&store.UploadItemResponse{Id: fileName, Size: fileSize})
 }
 
+// DownloadItem contains the logic for downloading a file from the server.
 func (s *storeController) DownloadItem(req *store.DownloadItemRequest, stream store.Store_DownloadItemServer) error {
 	id := req.GetId()
-	path := filepath.Join("/Users/elmore/passman/server", id)
+	path := filepath.Join(s.workDir, id)
 
 	fileInfo, err := os.Stat(path)
 	if err != nil {
@@ -99,6 +102,9 @@ func (s *storeController) DownloadItem(req *store.DownloadItemRequest, stream st
 
 var _ store.StoreServer = (*storeController)(nil)
 
-func NewStoreController() store.StoreServer {
-	return &storeController{}
+// NewStoreController initiates new instance of StoreServer.
+func NewStoreController(workDir string) store.StoreServer {
+	return &storeController{
+		workDir: workDir,
+	}
 }
