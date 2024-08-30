@@ -2,30 +2,35 @@ package main
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/e1m0re/passman/internal/client/service"
+	"github.com/e1m0re/passman/internal/client/app"
+	"github.com/e1m0re/passman/internal/client/config"
+	"github.com/e1m0re/passman/internal/client/grpc"
 )
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
 
-	grpcClient, err := service.NewGRPCClient()
+	app1, err := app.NewApp(&config.AppConfig{
+		GRPCConfig: &grpc.ClientConfig{
+			Port:     3000,
+			Hostname: "localhost",
+			WorkDir:  "/Users/elmore/passman/client",
+		},
+	})
 	if err != nil {
-		log.Panic(err)
-	}
-
-	//err = grpcClient.UploadItem(ctx, "/Users/elmore/Downloads/artifacts.zip")
-	err = grpcClient.DownloadItem(ctx, "7ff351d0-5594-45b2-825e-a067e3ef242d")
-	if err != nil {
-		slog.WarnContext(ctx, "sync item failed", slog.String("error", err.Error()))
+		slog.Error("initialization failed", slog.String("error", err.Error()))
 		return
 	}
 
-	log.Println("file send successfully")
+	err = app1.Start(ctx)
+	if err != nil {
+		slog.Error("start application failed", slog.String("error", err.Error()))
+		return
+	}
 }

@@ -1,11 +1,13 @@
-package service
+package grpc
 
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -26,31 +28,33 @@ type GRPCClient interface {
 }
 
 type grpcClient struct {
-	conn   *grpc.ClientConn
-	client store.StoreClient
+	config     *ClientConfig
+	connection *grpc.ClientConn
+	client     store.StoreClient
 }
 
 // Shutdown closes connection.
 func (g *grpcClient) Shutdown() error {
-	return g.conn.Close()
+	return g.connection.Close()
 }
 
 // UploadItem send file to server.
-func (g *grpcClient) UploadItem(ctx context.Context, filePath string) error {
+func (g *grpcClient) UploadItem(ctx context.Context, id string) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	filePath := filepath.Join(g.config.WorkDir, id)
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
 
 	stream, err := g.client.UploadItem(ctx)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Open(filePath)
-	if err != nil {
-		return err
-	}
-
-	buf := make([]byte, 1000)
+	buf := make([]byte, 1024)
 	batchNumber := 1
 	for {
 		num, err := file.Read(buf)
@@ -86,6 +90,7 @@ func (g *grpcClient) UploadItem(ctx context.Context, filePath string) error {
 	return nil
 }
 
+// DownloadItem gets file from server.
 func (g *grpcClient) DownloadItem(ctx context.Context, id string) error {
 	req := &store.DownloadItemRequest{
 		Id: id,
@@ -96,14 +101,14 @@ func (g *grpcClient) DownloadItem(ctx context.Context, id string) error {
 		return err
 	}
 
-	fileName := "/Users/elmore/passman/client/" + id
+	filePath := filepath.Join(g.config.WorkDir, id)
 	var downloaded int64
 	var buffer bytes.Buffer
 
 	for {
 		res, err := stream.Recv()
 		if err == io.EOF {
-			if err := os.WriteFile(fileName, buffer.Bytes(), 0777); err != nil {
+			if err := os.WriteFile(filePath, buffer.Bytes(), 0666); err != nil {
 				return err
 			}
 			break
@@ -125,14 +130,16 @@ func (g *grpcClient) DownloadItem(ctx context.Context, id string) error {
 
 var _ GRPCClient = (*grpcClient)(nil)
 
-func NewGRPCClient() (GRPCClient, error) {
-	conn, err := grpc.NewClient("localhost:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+// NewGRPCClient initiates new instance of GRPCClient.
+func NewGRPCClient(cfg *ClientConfig) (GRPCClient, error) {
+	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", cfg.Hostname, cfg.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
 
 	return &grpcClient{
-		conn:   conn,
-		client: store.NewStoreClient(conn),
+		config:     cfg,
+		connection: conn,
+		client:     store.NewStoreClient(conn),
 	}, err
 }
