@@ -43,7 +43,7 @@ func (g *grpcClient) UploadItem(ctx context.Context, id string) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	filePath := filepath.Join(g.config.workDir, id)
+	filePath := filepath.Join(g.config.WorkDir, id)
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func (g *grpcClient) DownloadItem(ctx context.Context, id string) error {
 		return err
 	}
 
-	filePath := filepath.Join(g.config.workDir, id)
+	filePath := filepath.Join(g.config.WorkDir, id)
 	var downloaded int64
 	var buffer bytes.Buffer
 

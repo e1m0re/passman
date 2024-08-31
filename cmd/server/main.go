@@ -2,7 +2,6 @@ package main
 
 import (
 	"log/slog"
-	"os"
 
 	googleGrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -18,8 +17,9 @@ import (
 
 func main() {
 	dbService, err := db.NewDBService(db.DatabaseConfig{
-		Driver:                  "pgx",
-		Url:                     os.Getenv("DATABASE_DSN"),
+		Driver: "pgx",
+		//Url:                     os.Getenv("DATABASE_DSN"),
+		Url:                     "postgresql://passman:passman@127.0.0.1:5432/passman?sslmode=disable",
 		ConnMaxLifetimeInMinute: 3,
 		MaxOpenConnections:      10,
 		MaxIdleConnections:      1,
@@ -49,8 +49,8 @@ func main() {
 	}
 
 	datumRepository := repository.NewDatumRepository(dbService)
-	storeService := store.NewStoreService(datumRepository)
-	storeController := grpcCtrl.NewStoreController("/Users/elmore/passman/server", storeService)
+	storeService := store.NewService("/Users/elmore/passman/server", datumRepository)
+	storeController := grpcCtrl.NewStoreController(storeService)
 
 	go grpcServer.Start(
 		func(server *googleGrpc.Server) {

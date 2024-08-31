@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"github.com/e1m0re/passman/internal/model"
 
+	"github.com/e1m0re/passman/internal/model"
 	"github.com/e1m0re/passman/internal/models"
 )
 

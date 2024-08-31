@@ -2,10 +2,9 @@ package app
 
 import (
 	"context"
-	"log/slog"
-
 	"github.com/e1m0re/passman/internal/client/config"
 	"github.com/e1m0re/passman/internal/client/grpc"
+	"log/slog"
 )
 
 type App interface {
@@ -21,20 +20,20 @@ type app struct {
 // Start runs client application.
 func (a app) Start(ctx context.Context) error {
 	//uid := "7ff351d0-5594-45b2-825e-a067e3ef242d"
-	uid := "[69-07 KSC13] Руководство по эксплуатации.pdf"
-	err := a.grpcClient.UploadItem(ctx, uid)
-	if err != nil {
-		slog.WarnContext(ctx, "sync item failed (to server)", slog.String("error", err.Error()))
-	}
-	slog.Info("sync item to server success", slog.String("id", uid))
-
-	//uid = "Структура данных описания типа события.pdf"
-	////uid = "7ff351d0-5594-45b2-825e-a067e3ef242e"
-	//err = a.grpcClient.DownloadItem(ctx, uid)
+	//uid := "[69-07 KSC13] Руководство по эксплуатации.pdf"
+	//err := a.grpcClient.UploadItem(ctx, uid)
 	//if err != nil {
-	//	slog.WarnContext(ctx, "sync item failed (from)", slog.String("error", err.Error()))
+	//	slog.WarnContext(ctx, "sync item failed (to server)", slog.String("error", err.Error()))
 	//}
 	//slog.Info("sync item to server success", slog.String("id", uid))
+
+	//uid = "Структура данных описания типа события.pdf"
+	uid := "cf39d630-deb1-45c0-96c7-1bf9b7a6b6c4"
+	err := a.grpcClient.DownloadItem(ctx, uid)
+	if err != nil {
+		slog.WarnContext(ctx, "sync item failed (from)", slog.String("error", err.Error()))
+	}
+	slog.Info("sync item to server success", slog.String("id", uid))
 
 	return nil
 }

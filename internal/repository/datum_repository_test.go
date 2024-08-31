@@ -73,7 +73,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 			mock: func() DatumRepository {
 				repo := NewDatumRepository(db)
 
-				rows := mock.NewRows([]string{"id"}).AddRow(model.DatumId("1"))
+				rows := mock.NewRows([]string{"id"}).AddRow(model.DatumID("1"))
 
 				mock.
 					ExpectQuery("^INSERT INTO users_data \\(type, user, file, checksum\\) VALUES \\(\\?,\\?,\\?,\\?\\) RETURNING id$").
@@ -83,7 +83,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 			},
 			want: want{
 				DatumItem: &model.DatumItem{
-					ID:       model.DatumId("1"),
+					ID:       model.DatumID("1"),
 					TypeID:   model.TextItem,
 					UserID:   model.UserID(1),
 					File:     make([]byte, 0),
@@ -183,7 +183,7 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 			},
 			want: want{
 				dataItem: &model.DatumItem{
-					ID:       model.DatumId("1"),
+					ID:       model.DatumID("1"),
 					TypeID:   model.TextItem,
 					UserID:   1,
 					File:     []byte("1"),
