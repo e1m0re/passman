@@ -15,8 +15,8 @@ import (
 	proto "github.com/e1m0re/passman/pkg/proto"
 )
 
-//go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=Service
-type Service interface {
+//go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=StoreService
+type StoreService interface {
 	// AddItem creates new datum item.
 	AddItem(ctx context.Context, datumInfo model.DatumInfo) (*model.DatumItem, error)
 	// SaveFile creates new file from stream.
@@ -25,18 +25,18 @@ type Service interface {
 	UploadFile(ctx context.Context, id string, stream proto.Store_DownloadItemServer) error
 }
 
-type service struct {
+type storeService struct {
 	workDir         string
 	datumRepository repository.DatumRepository
 }
 
 // AddItem creates new datum item.
-func (s service) AddItem(ctx context.Context, datumInfo model.DatumInfo) (*model.DatumItem, error) {
+func (s storeService) AddItem(ctx context.Context, datumInfo model.DatumInfo) (*model.DatumItem, error) {
 	return s.datumRepository.AddItem(ctx, datumInfo)
 }
 
 // SaveFile creates new file from stream.
-func (s service) SaveFile(ctx context.Context, stream proto.Store_UploadItemServer) (os.FileInfo, error) {
+func (s storeService) SaveFile(ctx context.Context, stream proto.Store_UploadItemServer) (os.FileInfo, error) {
 	userId := 1
 	var file *os.File
 
@@ -95,7 +95,7 @@ func (s service) SaveFile(ctx context.Context, stream proto.Store_UploadItemServ
 }
 
 // UploadFile sends file to stream.
-func (s service) UploadFile(ctx context.Context, id string, stream proto.Store_DownloadItemServer) error {
+func (s storeService) UploadFile(ctx context.Context, id string, stream proto.Store_DownloadItemServer) error {
 	userId := 1
 	datumItem, err := s.datumRepository.FindItemByFileName(ctx, id)
 	if err != nil {
@@ -141,11 +141,11 @@ func (s service) UploadFile(ctx context.Context, id string, stream proto.Store_D
 	return nil
 }
 
-var _ Service = (*service)(nil)
+var _ StoreService = (*storeService)(nil)
 
-// NewService initiates new instance of Service.
-func NewService(workDir string, datumRepository repository.DatumRepository) Service {
-	return &service{
+// NewStoreService initiates new instance of StoreService.
+func NewStoreService(workDir string, datumRepository repository.DatumRepository) StoreService {
+	return &storeService{
 		workDir:         workDir,
 		datumRepository: datumRepository,
 	}

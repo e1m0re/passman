@@ -49,7 +49,7 @@ func main() {
 	}
 
 	datumRepository := repository.NewDatumRepository(dbService)
-	storeService := store.NewService("/Users/elmore/passman/server", datumRepository)
+	storeService := store.NewStoreService("/Users/elmore/passman/server", datumRepository)
 	storeController := grpcCtrl.NewStoreController(storeService)
 
 	go grpcServer.Start(

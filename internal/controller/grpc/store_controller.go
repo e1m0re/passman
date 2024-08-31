@@ -9,7 +9,7 @@ import (
 )
 
 type storeController struct {
-	storeService store.Service
+	storeService store.StoreService
 
 	proto.UnimplementedStoreServer
 }
@@ -43,7 +43,7 @@ func (s *storeController) DownloadItem(req *proto.DownloadItemRequest, stream pr
 var _ proto.StoreServer = (*storeController)(nil)
 
 // NewStoreController initiates new instance of StoreServer.
-func NewStoreController(storeService store.Service) proto.StoreServer {
+func NewStoreController(storeService store.StoreService) proto.StoreServer {
 	return &storeController{
 		storeService: storeService,
 	}

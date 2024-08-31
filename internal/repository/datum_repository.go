@@ -52,5 +52,7 @@ var _ DatumRepository = (*datumRepository)(nil)
 
 // NewDatumRepository initiates new instance of DatumRepository.
 func NewDatumRepository(db db.DBService) DatumRepository {
-	return &datumRepository{db: db}
+	return &datumRepository{
+		db: db,
+	}
 }

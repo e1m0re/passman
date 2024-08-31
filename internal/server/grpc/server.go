@@ -2,14 +2,14 @@ package grpc
 
 import (
 	"fmt"
+	"github.com/e1m0re/passman/internal/server/grpc/interceptors"
 	"io"
 	"log/slog"
 	"net"
 	"time"
 
-	"google.golang.org/grpc/keepalive"
-
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 type Server interface {
@@ -71,6 +71,8 @@ func buildOptions(config Config) ([]grpc.ServerOption, error) {
 	return []grpc.ServerOption{
 		grpc.KeepaliveParams(buildKeepaliveParams(config.KeepaliveParams)),
 		grpc.KeepaliveEnforcementPolicy(buildKeepalivePolicy(config.KeepalivePolicy)),
+		grpc.UnaryInterceptor(interceptors.UnaryInterceptor),
+		grpc.StreamInterceptor(interceptors.StreamInterceptor),
 	}, nil
 }
 

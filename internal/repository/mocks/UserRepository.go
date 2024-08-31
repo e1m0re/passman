@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	models "github.com/e1m0re/passman/internal/models"
+	model "github.com/e1m0re/passman/internal/model"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -15,27 +15,27 @@ type UserRepository struct {
 }
 
 // AddUser provides a mock function with given fields: ctx, credentials
-func (_m *UserRepository) AddUser(ctx context.Context, credentials models.Credentials) (*models.User, error) {
+func (_m *UserRepository) AddUser(ctx context.Context, credentials model.Credentials) (*model.User, error) {
 	ret := _m.Called(ctx, credentials)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AddUser")
 	}
 
-	var r0 *models.User
+	var r0 *model.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.Credentials) (*models.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, model.Credentials) (*model.User, error)); ok {
 		return rf(ctx, credentials)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, models.Credentials) *models.User); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, model.Credentials) *model.User); ok {
 		r0 = rf(ctx, credentials)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.User)
+			r0 = ret.Get(0).(*model.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, models.Credentials) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, model.Credentials) error); ok {
 		r1 = rf(ctx, credentials)
 	} else {
 		r1 = ret.Error(1)
@@ -44,58 +44,28 @@ func (_m *UserRepository) AddUser(ctx context.Context, credentials models.Creden
 	return r0, r1
 }
 
-// FindUserByID provides a mock function with given fields: ctx, id
-func (_m *UserRepository) FindUserByID(ctx context.Context, id models.UserID) (*models.User, error) {
-	ret := _m.Called(ctx, id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for FindUserByID")
-	}
-
-	var r0 *models.User
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.UserID) (*models.User, error)); ok {
-		return rf(ctx, id)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, models.UserID) *models.User); ok {
-		r0 = rf(ctx, id)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.User)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, models.UserID) error); ok {
-		r1 = rf(ctx, id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // FindUserByUsername provides a mock function with given fields: ctx, username
-func (_m *UserRepository) FindUserByUsername(ctx context.Context, username []byte) (*models.User, error) {
+func (_m *UserRepository) FindUserByUsername(ctx context.Context, username string) (*model.User, error) {
 	ret := _m.Called(ctx, username)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindUserByUsername")
 	}
 
-	var r0 *models.User
+	var r0 *model.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, []byte) (*models.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*model.User, error)); ok {
 		return rf(ctx, username)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, []byte) *models.User); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) *model.User); ok {
 		r0 = rf(ctx, username)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.User)
+			r0 = ret.Get(0).(*model.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, []byte) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
 		r1 = rf(ctx, username)
 	} else {
 		r1 = ret.Error(1)
