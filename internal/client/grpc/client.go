@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	proto "github.com/e1m0re/passman/pkg/proto"
+	proto "github.com/e1m0re/passman/proto"
 )
 
 type GRPCClient interface {

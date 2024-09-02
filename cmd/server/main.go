@@ -12,7 +12,7 @@ import (
 	"github.com/e1m0re/passman/internal/server/grpc"
 	"github.com/e1m0re/passman/internal/service/db"
 	"github.com/e1m0re/passman/internal/service/store"
-	proto "github.com/e1m0re/passman/pkg/proto"
+	"github.com/e1m0re/passman/proto"
 )
 
 func main() {
@@ -54,7 +54,7 @@ func main() {
 
 	go grpcServer.Start(
 		func(server *googleGrpc.Server) {
-			proto.RegisterStoreServer(server, storeController)
+			proto.RegisterStoreServiceServer(server, storeController)
 		})
 
 	server.AddShutdownHook(grpcServer, dbService)

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package protobuf.user.service;
+
+option go_package = "user/proto";
+
+enum StatusCode {
+  EC_UNKNOWN = 0;
+  SUCCESS = 1;
+  INVALID_REQUEST = 2;
+  DUPLICATE_USER = 3;
+}
+
+message SignUpRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message SignUpResponse {
+  StatusCode status = 1;
+  string message = 3;
+}
+
+service UserService {
+  rpc SignUp(SignUpRequest) returns (SignUpResponse);
+}

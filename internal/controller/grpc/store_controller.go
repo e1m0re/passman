@@ -5,13 +5,13 @@ import (
 	"log/slog"
 
 	"github.com/e1m0re/passman/internal/service/store"
-	proto "github.com/e1m0re/passman/pkg/proto"
+	"github.com/e1m0re/passman/proto"
 )
 
 type storeController struct {
 	storeService store.StoreService
 
-	proto.UnimplementedStoreServer
+	proto.UnimplementedStoreServiceServer
 }
 
 func (s *storeController) GetItemsList(ctx context.Context, request *proto.GetItemsListRequest) (*proto.GetItemsListResponse, error) {
@@ -20,7 +20,7 @@ func (s *storeController) GetItemsList(ctx context.Context, request *proto.GetIt
 }
 
 // UploadItem contains the logic for uploading a file to the server.
-func (s *storeController) UploadItem(stream proto.Store_UploadItemServer) error {
+func (s *storeController) UploadItem(stream proto.StoreService_UploadItemServer) error {
 	fileInfo, err := s.storeService.SaveFile(stream.Context(), stream)
 	if err != nil {
 		slog.Error("save file to store failed", slog.String("error", err.Error()))
@@ -31,7 +31,7 @@ func (s *storeController) UploadItem(stream proto.Store_UploadItemServer) error 
 }
 
 // DownloadItem contains the logic for downloading a file from the server.
-func (s *storeController) DownloadItem(req *proto.DownloadItemRequest, stream proto.Store_DownloadItemServer) error {
+func (s *storeController) DownloadItem(req *proto.DownloadItemRequest, stream proto.StoreService_DownloadItemServer) error {
 	err := s.storeService.UploadFile(stream.Context(), req.GetGuid(), stream)
 	if err != nil {
 		slog.Error("send file to client failed", slog.String("error", err.Error()))
@@ -40,10 +40,10 @@ func (s *storeController) DownloadItem(req *proto.DownloadItemRequest, stream pr
 	return err
 }
 
-var _ proto.StoreServer = (*storeController)(nil)
+var _ proto.StoreServiceServer = (*storeController)(nil)
 
 // NewStoreController initiates new instance of StoreServer.
-func NewStoreController(storeService store.StoreService) proto.StoreServer {
+func NewStoreController(storeService store.StoreService) proto.StoreServiceServer {
 	return &storeController{
 		storeService: storeService,
 	}

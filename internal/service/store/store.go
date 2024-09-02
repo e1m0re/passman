@@ -12,7 +12,7 @@ import (
 	"github.com/e1m0re/passman/internal/model"
 	"github.com/e1m0re/passman/internal/repository"
 	"github.com/e1m0re/passman/internal/tools/encrypt"
-	proto "github.com/e1m0re/passman/pkg/proto"
+	proto "github.com/e1m0re/passman/proto"
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=StoreService
@@ -20,9 +20,9 @@ type StoreService interface {
 	// AddItem creates new datum item.
 	AddItem(ctx context.Context, datumInfo model.DatumInfo) (*model.DatumItem, error)
 	// SaveFile creates new file from stream.
-	SaveFile(ctx context.Context, stream proto.Store_UploadItemServer) (os.FileInfo, error)
+	SaveFile(ctx context.Context, stream proto.StoreService_UploadItemServer) (os.FileInfo, error)
 	// UploadFile sends file to stream.
-	UploadFile(ctx context.Context, id string, stream proto.Store_DownloadItemServer) error
+	UploadFile(ctx context.Context, id string, stream proto.StoreService_DownloadItemServer) error
 }
 
 type storeService struct {
@@ -36,7 +36,7 @@ func (s storeService) AddItem(ctx context.Context, datumInfo model.DatumInfo) (*
 }
 
 // SaveFile creates new file from stream.
-func (s storeService) SaveFile(ctx context.Context, stream proto.Store_UploadItemServer) (os.FileInfo, error) {
+func (s storeService) SaveFile(ctx context.Context, stream proto.StoreService_UploadItemServer) (os.FileInfo, error) {
 	userId := 1
 	var file *os.File
 
@@ -95,7 +95,7 @@ func (s storeService) SaveFile(ctx context.Context, stream proto.Store_UploadIte
 }
 
 // UploadFile sends file to stream.
-func (s storeService) UploadFile(ctx context.Context, id string, stream proto.Store_DownloadItemServer) error {
+func (s storeService) UploadFile(ctx context.Context, id string, stream proto.StoreService_DownloadItemServer) error {
 	userId := 1
 	datumItem, err := s.datumRepository.FindItemByFileName(ctx, id)
 	if err != nil {
