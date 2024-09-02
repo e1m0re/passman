@@ -3,7 +3,9 @@ package grpc
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"google.golang.org/grpc/codes"
 	"io"
 	"log/slog"
 	"os"
@@ -13,12 +15,16 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	proto "github.com/e1m0re/passman/proto"
+	"github.com/e1m0re/passman/internal/model"
+	"github.com/e1m0re/passman/proto"
 )
 
 type GRPCClient interface {
 	// Shutdown closes connection.
 	Shutdown() error
+
+	// SignUp registers new user on the server.
+	SignUp(ctx context.Context, credentials model.Credentials) error
 
 	// UploadItem send file to server.
 	UploadItem(ctx context.Context, filePath string) error
@@ -28,9 +34,10 @@ type GRPCClient interface {
 }
 
 type grpcClient struct {
-	config     *ClientConfig
-	connection *grpc.ClientConn
-	client     proto.StoreServiceClient
+	config      *ClientConfig
+	connection  *grpc.ClientConn
+	storeClient proto.StoreServiceClient
+	authClient  proto.AuthServiceClient
 }
 
 // Shutdown closes connection.
@@ -38,18 +45,34 @@ func (g *grpcClient) Shutdown() error {
 	return g.connection.Close()
 }
 
+// SignUp registers new user on the server.
+func (g *grpcClient) SignUp(ctx context.Context, credentials model.Credentials) error {
+	request := &proto.SignUpRequest{
+		Username: credentials.Username,
+		Password: credentials.Password,
+	}
+
+	resp, err := g.authClient.SignUp(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	if resp.Status == proto.StatusCode(codes.Internal) {
+		return errors.New(resp.Message)
+	}
+
+	return nil
+}
+
 // UploadItem send file to server.
 func (g *grpcClient) UploadItem(ctx context.Context, id string) error {
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
 	filePath := filepath.Join(g.config.WorkDir, id)
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
 	}
 
-	stream, err := g.client.UploadItem(ctx)
+	stream, err := g.storeClient.UploadItem(ctx)
 	if err != nil {
 		return err
 	}
@@ -86,7 +109,6 @@ func (g *grpcClient) UploadItem(ctx context.Context, id string) error {
 		slog.Int("size", int(res.GetSize())),
 	)
 
-	cancel()
 	return nil
 }
 
@@ -96,7 +118,7 @@ func (g *grpcClient) DownloadItem(ctx context.Context, id string) error {
 		Guid: id,
 	}
 
-	stream, err := g.client.DownloadItem(ctx, req)
+	stream, err := g.storeClient.DownloadItem(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -138,8 +160,9 @@ func NewGRPCClient(cfg *ClientConfig) (GRPCClient, error) {
 	}
 
 	return &grpcClient{
-		config:     cfg,
-		connection: conn,
-		client:     proto.NewStoreServiceClient(conn),
+		config:      cfg,
+		connection:  conn,
+		storeClient: proto.NewStoreServiceClient(conn),
+		authClient:  proto.NewAuthServiceClient(conn),
 	}, err
 }

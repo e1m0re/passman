@@ -2,9 +2,11 @@ package app
 
 import (
 	"context"
+	"github.com/e1m0re/passman/internal/model"
+	"log/slog"
+
 	"github.com/e1m0re/passman/internal/client/config"
 	"github.com/e1m0re/passman/internal/client/grpc"
-	"log/slog"
 )
 
 type App interface {
@@ -28,12 +30,20 @@ func (a app) Start(ctx context.Context) error {
 	//slog.Info("sync item to server success", slog.String("id", uid))
 
 	//uid = "Структура данных описания типа события.pdf"
-	uid := "cf39d630-deb1-45c0-96c7-1bf9b7a6b6c4"
-	err := a.grpcClient.DownloadItem(ctx, uid)
+	//uid := "cf39d630-deb1-45c0-96c7-1bf9b7a6b6c4"
+	//err := a.grpcClient.DownloadItem(ctx, uid)
+	//if err != nil {
+	//	slog.WarnContext(ctx, "sync item failed (from)", slog.String("error", err.Error()))
+	//}
+	//slog.Info("sync item to server success", slog.String("id", uid))
+
+	err := a.grpcClient.SignUp(ctx, model.Credentials{
+		Password: "password",
+		Username: "user",
+	})
 	if err != nil {
-		slog.WarnContext(ctx, "sync item failed (from)", slog.String("error", err.Error()))
+		slog.Error("registration failed", slog.String("error", err.Error()))
 	}
-	slog.Info("sync item to server success", slog.String("id", uid))
 
 	return nil
 }
