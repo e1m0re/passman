@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/e1m0re/passman/internal/service/store"
+	"github.com/e1m0re/passman/internal/server/service/store"
 	"github.com/e1m0re/passman/proto"
 )
 

@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/e1m0re/passman/internal/model"
-	"github.com/e1m0re/passman/internal/repository"
+	"github.com/e1m0re/passman/internal/server/repository"
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=UserManager

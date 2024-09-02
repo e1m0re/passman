@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/e1m0re/passman/internal/model"
-	"github.com/e1m0re/passman/internal/service/db"
+	"github.com/e1m0re/passman/internal/server/service/db"
 )
 
 var (

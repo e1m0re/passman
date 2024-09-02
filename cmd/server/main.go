@@ -7,14 +7,14 @@ import (
 	googleGrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	grpcCtrl "github.com/e1m0re/passman/internal/controller/grpc"
-	"github.com/e1m0re/passman/internal/repository"
 	"github.com/e1m0re/passman/internal/server"
+	grpcCtrl "github.com/e1m0re/passman/internal/server/controller/grpc"
 	"github.com/e1m0re/passman/internal/server/grpc"
-	"github.com/e1m0re/passman/internal/service/db"
-	"github.com/e1m0re/passman/internal/service/jwt"
-	"github.com/e1m0re/passman/internal/service/store"
-	"github.com/e1m0re/passman/internal/service/users"
+	"github.com/e1m0re/passman/internal/server/repository"
+	"github.com/e1m0re/passman/internal/server/service/db"
+	"github.com/e1m0re/passman/internal/server/service/jwt"
+	"github.com/e1m0re/passman/internal/server/service/store"
+	"github.com/e1m0re/passman/internal/server/service/users"
 	"github.com/e1m0re/passman/proto"
 )
 

@@ -2,8 +2,6 @@ package grpc
 
 import (
 	"fmt"
-	"github.com/e1m0re/passman/internal/server/grpc/interceptors"
-	"github.com/e1m0re/passman/internal/service/jwt"
 	"io"
 	"log/slog"
 	"net"
@@ -11,6 +9,9 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
+
+	"github.com/e1m0re/passman/internal/server/grpc/interceptors"
+	"github.com/e1m0re/passman/internal/server/service/jwt"
 )
 
 type Server interface {

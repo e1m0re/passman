@@ -12,8 +12,8 @@ import (
 	sqlxmock "github.com/zhashkevych/go-sqlxmock"
 
 	"github.com/e1m0re/passman/internal/model"
-	"github.com/e1m0re/passman/internal/repository"
-	"github.com/e1m0re/passman/internal/service/db/mocks"
+	"github.com/e1m0re/passman/internal/server/repository"
+	"github.com/e1m0re/passman/internal/server/service/db/mocks"
 )
 
 func Test_userRepository_Add(t *testing.T) {

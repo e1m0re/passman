@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	commongrpc "github.com/e1m0re/passman/internal/common/grpc"
-	"github.com/e1m0re/passman/internal/service/jwt"
+	"github.com/e1m0re/passman/internal/server/service/jwt"
 )
 
 // AuthInterceptor is a server interceptor for authentication and authorization.

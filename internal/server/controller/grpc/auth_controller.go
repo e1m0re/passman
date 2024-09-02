@@ -9,9 +9,9 @@ import (
 	"google.golang.org/grpc/codes"
 
 	"github.com/e1m0re/passman/internal/model"
-	"github.com/e1m0re/passman/internal/repository"
-	"github.com/e1m0re/passman/internal/service/jwt"
-	"github.com/e1m0re/passman/internal/service/users"
+	"github.com/e1m0re/passman/internal/server/repository"
+	"github.com/e1m0re/passman/internal/server/service/jwt"
+	"github.com/e1m0re/passman/internal/server/service/users"
 	"github.com/e1m0re/passman/proto"
 )
 

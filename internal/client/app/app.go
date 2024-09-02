@@ -3,10 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"time"
 
 	"github.com/e1m0re/passman/internal/client/config"
 	grpcclient "github.com/e1m0re/passman/internal/client/grpc"
@@ -21,38 +21,6 @@ type App interface {
 
 type app struct {
 	cfg *config.AppConfig
-}
-
-func posString(slice []string, element string) int {
-	for index, elem := range slice {
-		if elem == element {
-			return index
-		}
-	}
-	return -1
-}
-
-// containsString returns true iff slice contains element
-func containsString(slice []string, element string) bool {
-	return !(posString(slice, element) == -1)
-}
-
-func askForConfirmation() bool {
-	var response string
-	_, err := fmt.Scanln(&response)
-	if err != nil {
-		log.Fatal(err)
-	}
-	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
-	nokayResponses := []string{"n", "N", "no", "No", "NO"}
-	if containsString(okayResponses, response) {
-		return true
-	} else if containsString(nokayResponses, response) {
-		return false
-	} else {
-		fmt.Println("Please type yes or no and then press enter:")
-		return askForConfirmation()
-	}
 }
 
 // Start runs client application.

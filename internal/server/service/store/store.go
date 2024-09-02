@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/e1m0re/passman/internal/model"
-	"github.com/e1m0re/passman/internal/repository"
+	"github.com/e1m0re/passman/internal/server/repository"
 	"github.com/e1m0re/passman/internal/tools/encrypt"
 	proto "github.com/e1m0re/passman/proto"
 )
