@@ -1,9 +1,11 @@
-package repository
+package repository_test
 
 import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/e1m0re/passman/internal/repository"
+	"github.com/e1m0re/passman/internal/service/db/mocks"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,7 +32,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() DatumRepository
+		mock func() repository.DatumRepository
 		args args
 		want want
 	}{
@@ -40,16 +42,19 @@ func Test_datumRepository_AddItem(t *testing.T) {
 				ctx: context.Background(),
 				data: model.DatumInfo{
 					TypeID:   model.TextItem,
-					UserID:   model.UserID(1),
-					File:     make([]byte, 0),
-					Checksum: make([]byte, 0),
+					UserID:   1,
+					File:     "",
+					Checksum: "",
 				},
 			},
-			mock: func() DatumRepository {
-				repo := NewDatumRepository(db)
+			mock: func() repository.DatumRepository {
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewDatumRepository(mockDBService)
 
 				mock.
-					ExpectQuery("^INSERT INTO users_data \\(type, user, file, checksum\\) VALUES \\(\\?,\\?,\\?,\\?\\) RETURNING id$").
+					ExpectQuery("^INSERT INTO users_data \\(type, \"user\", file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4\\) RETURNING id$").
 					WillReturnError(errors.New("something wrong"))
 
 				return repo
@@ -65,29 +70,32 @@ func Test_datumRepository_AddItem(t *testing.T) {
 				ctx: context.Background(),
 				data: model.DatumInfo{
 					TypeID:   model.TextItem,
-					UserID:   model.UserID(1),
-					File:     make([]byte, 0),
-					Checksum: make([]byte, 0),
+					UserID:   1,
+					File:     "",
+					Checksum: "",
 				},
 			},
-			mock: func() DatumRepository {
-				repo := NewDatumRepository(db)
+			mock: func() repository.DatumRepository {
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
 
-				rows := mock.NewRows([]string{"id"}).AddRow(model.DatumID("1"))
+				repo := repository.NewDatumRepository(mockDBService)
+
+				rows := mock.NewRows([]string{"id"}).AddRow("1")
 
 				mock.
-					ExpectQuery("^INSERT INTO users_data \\(type, user, file, checksum\\) VALUES \\(\\?,\\?,\\?,\\?\\) RETURNING id$").
+					ExpectQuery("^INSERT INTO users_data \\(type, \"user\", file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4\\) RETURNING id$").
 					WillReturnRows(rows)
 
 				return repo
 			},
 			want: want{
 				DatumItem: &model.DatumItem{
-					ID:       model.DatumID("1"),
+					ID:       1,
 					TypeID:   model.TextItem,
-					UserID:   model.UserID(1),
-					File:     make([]byte, 0),
-					Checksum: make([]byte, 0),
+					UserID:   1,
+					File:     "",
+					Checksum: "",
 				},
 				err: nil,
 			},
@@ -120,17 +128,20 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		mock func() DatumRepository
+		mock func() repository.DatumRepository
 		args args
 		want want
 	}{
 		{
 			name: "Something wrong",
-			mock: func() DatumRepository {
-				repo := NewDatumRepository(db)
+			mock: func() repository.DatumRepository {
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewDatumRepository(mockDBService)
 
 				mock.
-					ExpectQuery("^SELECT \\* FROM users_data WHERE file = \\? LIMIT 1$").
+					ExpectQuery("^SELECT \\* FROM users_data WHERE file = \\$1 LIMIT 1$").
 					WillReturnError(errors.New("something wrong"))
 
 				return repo
@@ -146,11 +157,14 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 		},
 		{
 			name: "UsersDataItem not found",
-			mock: func() DatumRepository {
-				repo := NewDatumRepository(db)
+			mock: func() repository.DatumRepository {
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewDatumRepository(mockDBService)
 
 				mock.
-					ExpectQuery("^SELECT \\* FROM users_data WHERE file = \\? LIMIT 1$").
+					ExpectQuery("^SELECT \\* FROM users_data WHERE file = \\$1 LIMIT 1$").
 					WillReturnError(sql.ErrNoRows)
 
 				return repo
@@ -161,18 +175,21 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 			},
 			want: want{
 				dataItem: nil,
-				err:      ErrorEntityNotFound,
+				err:      repository.ErrorEntityNotFound,
 			},
 		},
 		{
 			name: "Successfully case",
-			mock: func() DatumRepository {
-				repo := NewDatumRepository(db)
+			mock: func() repository.DatumRepository {
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewDatumRepository(mockDBService)
 
 				rows := sqlxmock.NewRows([]string{"id", "type", "user", "file", "checksum"}).
 					AddRow("1", "1", "1", "1", "")
 				mock.
-					ExpectQuery("^SELECT \\* FROM users_data WHERE file = \\? LIMIT 1$").
+					ExpectQuery("^SELECT \\* FROM users_data WHERE file = \\$1 LIMIT 1$").
 					WillReturnRows(rows)
 
 				return repo
@@ -183,11 +200,11 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 			},
 			want: want{
 				dataItem: &model.DatumItem{
-					ID:       model.DatumID("1"),
+					ID:       1,
 					TypeID:   model.TextItem,
 					UserID:   1,
-					File:     []byte("1"),
-					Checksum: make([]byte, 0),
+					File:     "1",
+					Checksum: "",
 				},
 				err: nil,
 			},
@@ -205,11 +222,8 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 }
 
 func Test_datumRepository_NewDatumRepository(t *testing.T) {
-	db, _, err := sqlxmock.Newx()
-	if err != nil {
-		panic(err)
-	}
+	mockDBService := mocks.NewDBService(t)
 
-	repo := NewDatumRepository(db)
-	assert.Implements(t, (*DatumRepository)(nil), repo)
+	repo := repository.NewDatumRepository(mockDBService)
+	assert.Implements(t, (*repository.DatumRepository)(nil), repo)
 }

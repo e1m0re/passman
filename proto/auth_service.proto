@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package protobuf.user.service;
+package protobuf.auth.service;
 
-option go_package = "user/proto";
+option go_package = "auth/proto";
 
 enum StatusCode {
   EC_UNKNOWN = 0;
@@ -21,6 +21,6 @@ message SignUpResponse {
   string message = 3;
 }
 
-service UserService {
+service AuthService {
   rpc SignUp(SignUpRequest) returns (SignUpResponse);
 }

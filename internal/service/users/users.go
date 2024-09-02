@@ -10,19 +10,20 @@ import (
 	"github.com/e1m0re/passman/internal/repository"
 )
 
-type UsersService interface {
-	// NewUser creates new user.
-	NewUser(ctx context.Context, credentials model.Credentials) (*model.User, error)
+//go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=UserManager
+type UserManager interface {
+	// CreateUser creates new user.
+	CreateUser(ctx context.Context, credentials model.Credentials) (*model.User, error)
 	// FindUserByUsername finds user by username.
 	FindUserByUsername(ctx context.Context, username string) (*model.User, error)
 }
 
-type userService struct {
+type userManager struct {
 	userRepository repository.UserRepository
 }
 
-// NewUser creates new user.
-func (s userService) NewUser(ctx context.Context, credentials model.Credentials) (*model.User, error) {
+// CreateUser creates new user.
+func (um userManager) CreateUser(ctx context.Context, credentials model.Credentials) (*model.User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credentials.Password), 10)
 	if err != nil {
 		return nil, fmt.Errorf("cannot hash password: %w", err)
@@ -30,19 +31,19 @@ func (s userService) NewUser(ctx context.Context, credentials model.Credentials)
 
 	credentials.Password = string(hashedPassword)
 
-	return s.userRepository.AddUser(ctx, credentials)
+	return um.userRepository.AddUser(ctx, credentials)
 }
 
 // FindUserByUsername finds user by username.
-func (s userService) FindUserByUsername(ctx context.Context, username string) (*model.User, error) {
-	return s.userRepository.FindUserByUsername(ctx, username)
+func (um userManager) FindUserByUsername(ctx context.Context, username string) (*model.User, error) {
+	return um.userRepository.FindUserByUsername(ctx, username)
 }
 
-var _ UsersService = (*userService)(nil)
+var _ UserManager = (*userManager)(nil)
 
-// NewUsersService initiates new instance of UsersService.
-func NewUsersService(userRepository repository.UserRepository) UsersService {
-	return &userService{
+// NewUserManager initiates new instance of UserManager.
+func NewUserManager(userRepository repository.UserRepository) UserManager {
+	return &userManager{
 		userRepository: userRepository,
 	}
 }

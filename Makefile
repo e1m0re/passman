@@ -5,7 +5,6 @@ format-code:
 	goimports --local "github.com/e1m0re/passman" -w .
 
 test:
-	cd server;\
 	go test -race -covermode=atomic -coverprofile=coverage.out ./...
 
 build-server:

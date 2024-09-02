@@ -4,14 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/e1m0re/passman/internal/models"
-	"github.com/e1m0re/passman/internal/repository"
-	"github.com/e1m0re/passman/internal/repository/mocks"
+	"testing"
+
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	sqlxmock "github.com/zhashkevych/go-sqlxmock"
-	"testing"
+
+	"github.com/e1m0re/passman/internal/model"
+	"github.com/e1m0re/passman/internal/repository"
+	"github.com/e1m0re/passman/internal/service/db/mocks"
 )
 
 func Test_userRepository_Add(t *testing.T) {
@@ -23,10 +25,10 @@ func Test_userRepository_Add(t *testing.T) {
 
 	type args struct {
 		ctx         context.Context
-		credentials models.Credentials
+		credentials model.Credentials
 	}
 	type want struct {
-		user *models.User
+		user *model.User
 		err  error
 	}
 	tests := []struct {
@@ -39,9 +41,9 @@ func Test_userRepository_Add(t *testing.T) {
 			name: "Something wrong",
 			args: args{
 				ctx: context.Background(),
-				credentials: models.Credentials{
-					Username: []byte("username"),
-					Password: []byte("password"),
+				credentials: model.Credentials{
+					Username: "username",
+					Password: "password",
 				},
 			},
 			want: want{
@@ -49,7 +51,10 @@ func Test_userRepository_Add(t *testing.T) {
 				err:  errors.New("something wrong"),
 			},
 			mock: func() repository.UserRepository {
-				repo := mocks.NewUserRepository(t)
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewUserRepository(mockDBService)
 
 				mock.
 					ExpectQuery("^INSERT INTO users \\(username, password\\) VALUES \\(\\$1, \\$2\\) RETURNING id$").
@@ -62,9 +67,9 @@ func Test_userRepository_Add(t *testing.T) {
 			name: "Login is busy",
 			args: args{
 				ctx: context.Background(),
-				credentials: models.Credentials{
-					Username: []byte("username"),
-					Password: []byte("password"),
+				credentials: model.Credentials{
+					Username: "username",
+					Password: "password",
 				},
 			},
 			want: want{
@@ -72,7 +77,10 @@ func Test_userRepository_Add(t *testing.T) {
 				err:  repository.ErrorBusyLogin,
 			},
 			mock: func() repository.UserRepository {
-				repo := mocks.NewUserRepository()
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewUserRepository(mockDBService)
 
 				mock.
 					ExpectQuery("^INSERT INTO users \\(username, password\\) VALUES \\(\\$1, \\$2\\) RETURNING id$").
@@ -85,21 +93,24 @@ func Test_userRepository_Add(t *testing.T) {
 			name: "Successfully case",
 			args: args{
 				ctx: context.Background(),
-				credentials: models.Credentials{
-					Username: []byte("username"),
-					Password: []byte("password"),
+				credentials: model.Credentials{
+					Username: "username",
+					Password: "password",
 				},
 			},
 			want: want{
-				user: &models.User{
+				user: &model.User{
 					ID:       1,
-					Username: []byte("username"),
-					Password: []byte("password"),
+					Username: "username",
+					Password: "password",
 				},
 				err: nil,
 			},
 			mock: func() repository.UserRepository {
-				repo := NewUserRepository(db)
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewUserRepository(mockDBService)
 
 				rows := mock.NewRows([]string{"id"}).AddRow(1)
 
@@ -130,10 +141,10 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 
 	type args struct {
 		ctx      context.Context
-		username []byte
+		username string
 	}
 	type want struct {
-		user *models.User
+		user *model.User
 		err  error
 	}
 	tests := []struct {
@@ -145,7 +156,10 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 		{
 			name: "Something wrong",
 			mock: func() repository.UserRepository {
-				repo := NewUserRepository(db)
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewUserRepository(mockDBService)
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users WHERE username = \\$1 LIMIT 1$").
@@ -155,7 +169,7 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: []byte("username"),
+				username: "username",
 			},
 			want: want{
 				user: nil,
@@ -165,7 +179,10 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 		{
 			name: "User not found",
 			mock: func() repository.UserRepository {
-				repo := NewUserRepository(db)
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewUserRepository(mockDBService)
 
 				mock.
 					ExpectQuery("^SELECT \\* FROM users WHERE username = \\$1 LIMIT 1$").
@@ -175,7 +192,7 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: []byte("username"),
+				username: "username",
 			},
 			want: want{
 				user: nil,
@@ -185,7 +202,10 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 		{
 			name: "Successfully case",
 			mock: func() repository.UserRepository {
-				repo := NewUserRepository(db)
+				mockDBService := mocks.NewDBService(t)
+				mockDBService.On("GetDB").Return(db)
+
+				repo := repository.NewUserRepository(mockDBService)
 
 				rows := sqlxmock.NewRows([]string{"id", "username", "password"}).
 					AddRow("1", "username", "password")
@@ -197,13 +217,13 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 			},
 			args: args{
 				ctx:      context.Background(),
-				username: []byte("username"),
+				username: "username",
 			},
 			want: want{
-				user: &models.User{
+				user: &model.User{
 					ID:       1,
-					Username: []byte("username"),
-					Password: []byte("password"),
+					Username: "username",
+					Password: "password",
 				},
 				err: nil,
 			},
@@ -220,11 +240,8 @@ func Test_userRepository_FindByUsername(t *testing.T) {
 }
 
 func TestNewUserRepository(t *testing.T) {
-	db, _, err := sqlxmock.Newx()
-	if err != nil {
-		panic(err)
-	}
+	mockDBService := mocks.NewDBService(t)
 
-	repo := repository.NewUserRepository(db)
-	assert.Implements(t, (*UserRepository)(nil), repo)
+	repo := repository.NewUserRepository(mockDBService)
+	assert.Implements(t, (*repository.UserRepository)(nil), repo)
 }

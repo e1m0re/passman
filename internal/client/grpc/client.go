@@ -30,7 +30,7 @@ type GRPCClient interface {
 type grpcClient struct {
 	config     *ClientConfig
 	connection *grpc.ClientConn
-	client     proto.StoreClient
+	client     proto.StoreServiceClient
 }
 
 // Shutdown closes connection.
@@ -140,6 +140,6 @@ func NewGRPCClient(cfg *ClientConfig) (GRPCClient, error) {
 	return &grpcClient{
 		config:     cfg,
 		connection: conn,
-		client:     proto.NewStoreClient(conn),
+		client:     proto.NewStoreServiceClient(conn),
 	}, err
 }
