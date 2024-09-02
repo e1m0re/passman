@@ -3,6 +3,7 @@ package grpc
 import (
 	"fmt"
 	"github.com/e1m0re/passman/internal/server/grpc/interceptors"
+	"github.com/e1m0re/passman/internal/service/jwt"
 	"io"
 	"log/slog"
 	"net"
@@ -67,18 +68,20 @@ func buildKeepaliveParams(config keepalive.ServerParameters) keepalive.ServerPar
 	}
 }
 
-func buildOptions(config Config) ([]grpc.ServerOption, error) {
+func buildOptions(config Config, jwtManager jwt.JWTManager) ([]grpc.ServerOption, error) {
+	interceptor := interceptors.NewAuthInterceptor(jwtManager)
+
 	return []grpc.ServerOption{
 		grpc.KeepaliveParams(buildKeepaliveParams(config.KeepaliveParams)),
 		grpc.KeepaliveEnforcementPolicy(buildKeepalivePolicy(config.KeepalivePolicy)),
-		grpc.UnaryInterceptor(interceptors.UnaryInterceptor),
-		grpc.StreamInterceptor(interceptors.StreamInterceptor),
+		grpc.UnaryInterceptor(interceptor.Unary()),
+		grpc.StreamInterceptor(interceptor.Stream()),
 	}, nil
 }
 
 // NewGRPCServer initiates new instance of Server.
-func NewGRPCServer(cfg *Config) (Server, error) {
-	options, err := buildOptions(*cfg)
+func NewGRPCServer(cfg *Config, jwtManager jwt.JWTManager) (Server, error) {
+	options, err := buildOptions(*cfg, jwtManager)
 	if err != nil {
 		return nil, err
 	}

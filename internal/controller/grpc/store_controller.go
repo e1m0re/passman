@@ -42,7 +42,7 @@ func (s *storeController) DownloadItem(req *proto.DownloadItemRequest, stream pr
 
 var _ proto.StoreServiceServer = (*storeController)(nil)
 
-// NewStoreController initiates new instance of StoreServiceServer.
+// NewStoreController initiates a new instance of StoreServiceServer.
 func NewStoreController(storeService store.StoreService) proto.StoreServiceServer {
 	return &storeController{
 		storeService: storeService,

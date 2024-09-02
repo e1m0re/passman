@@ -21,6 +21,17 @@ message SignUpResponse {
   string message = 3;
 }
 
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  StatusCode status = 1;
+  string access_token = 2;
+}
+
 service AuthService {
   rpc SignUp(SignUpRequest) returns (SignUpResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
 }

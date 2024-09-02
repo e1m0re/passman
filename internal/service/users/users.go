@@ -16,6 +16,8 @@ type UserManager interface {
 	CreateUser(ctx context.Context, credentials model.Credentials) (*model.User, error)
 	// FindUserByUsername finds user by username.
 	FindUserByUsername(ctx context.Context, username string) (*model.User, error)
+	// CheckPassword validate specified users password.
+	CheckPassword(ctx context.Context, user model.User, password string) (ok bool, err error)
 }
 
 type userManager struct {
@@ -37,6 +39,16 @@ func (um userManager) CreateUser(ctx context.Context, credentials model.Credenti
 // FindUserByUsername finds user by username.
 func (um userManager) FindUserByUsername(ctx context.Context, username string) (*model.User, error) {
 	return um.userRepository.FindUserByUsername(ctx, username)
+}
+
+// CheckPassword validate specified users password.
+func (um userManager) CheckPassword(ctx context.Context, user model.User, password string) (ok bool, err error) {
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
 }
 
 var _ UserManager = (*userManager)(nil)

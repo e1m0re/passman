@@ -2,12 +2,17 @@ package app
 
 import (
 	"context"
-	"github.com/e1m0re/passman/internal/model"
-	"log/slog"
+	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"log"
+	"time"
 
 	"github.com/e1m0re/passman/internal/client/config"
-	"github.com/e1m0re/passman/internal/client/grpc"
+	grpcclient "github.com/e1m0re/passman/internal/client/grpc"
 )
+
+var AccessToken = ""
 
 type App interface {
 	// Start runs client application.
@@ -15,35 +20,73 @@ type App interface {
 }
 
 type app struct {
-	cfg        *config.AppConfig
-	grpcClient grpc.GRPCClient
+	cfg *config.AppConfig
+}
+
+func posString(slice []string, element string) int {
+	for index, elem := range slice {
+		if elem == element {
+			return index
+		}
+	}
+	return -1
+}
+
+// containsString returns true iff slice contains element
+func containsString(slice []string, element string) bool {
+	return !(posString(slice, element) == -1)
+}
+
+func askForConfirmation() bool {
+	var response string
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		log.Fatal(err)
+	}
+	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	if containsString(okayResponses, response) {
+		return true
+	} else if containsString(nokayResponses, response) {
+		return false
+	} else {
+		fmt.Println("Please type yes or no and then press enter:")
+		return askForConfirmation()
+	}
 }
 
 // Start runs client application.
 func (a app) Start(ctx context.Context) error {
-	//uid := "7ff351d0-5594-45b2-825e-a067e3ef242d"
-	//uid := "[69-07 KSC13] Руководство по эксплуатации.pdf"
-	//err := a.grpcClient.UploadItem(ctx, uid)
-	//if err != nil {
-	//	slog.WarnContext(ctx, "sync item failed (to server)", slog.String("error", err.Error()))
-	//}
-	//slog.Info("sync item to server success", slog.String("id", uid))
 
-	//uid = "Структура данных описания типа события.pdf"
-	//uid := "cf39d630-deb1-45c0-96c7-1bf9b7a6b6c4"
-	//err := a.grpcClient.DownloadItem(ctx, uid)
-	//if err != nil {
-	//	slog.WarnContext(ctx, "sync item failed (from)", slog.String("error", err.Error()))
-	//}
-	//slog.Info("sync item to server success", slog.String("id", uid))
+	username := "user"
+	password := "password"
+	server := fmt.Sprintf("%s:%d", a.cfg.GRPCConfig.Hostname, a.cfg.GRPCConfig.Port)
+	transportOption := grpc.WithTransportCredentials(insecure.NewCredentials())
 
-	err := a.grpcClient.SignUp(ctx, model.Credentials{
-		Password: "password",
-		Username: "user",
-	})
+	anonConnection, err := grpc.NewClient(server, transportOption)
 	if err != nil {
-		slog.Error("registration failed", slog.String("error", err.Error()))
+		return err
 	}
+
+	authClient := grpcclient.NewAuthClient(anonConnection, username, password)
+	interceptor, err := grpcclient.NewAuthInterceptor(authClient, 25*time.Second)
+	if err != nil {
+		return fmt.Errorf("create interceptors failed: %w", err)
+	}
+
+	_, err = grpc.NewClient(
+		server,
+		transportOption,
+		grpc.WithUnaryInterceptor(interceptor.Unary()),
+		grpc.WithStreamInterceptor(interceptor.Stream()),
+	)
+	if err != nil {
+		return err
+	}
+
+	//_ := grpcclient.NewStoreClient(secConnection, a.cfg.GRPCConfig.WorkDir)
+
+	time.Sleep(60 * time.Second)
 
 	return nil
 }
@@ -51,14 +94,8 @@ func (a app) Start(ctx context.Context) error {
 var _ App = (*app)(nil)
 
 // NewApp initiates new instance of App.
-func NewApp(cfg *config.AppConfig) (App, error) {
-	grpcClient, err := grpc.NewGRPCClient(cfg.GRPCConfig)
-	if err != nil {
-		return nil, err
-	}
-
+func NewApp(cfg *config.AppConfig) App {
 	return &app{
-		cfg:        cfg,
-		grpcClient: grpcClient,
-	}, nil
+		cfg: cfg,
+	}
 }

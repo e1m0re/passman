@@ -32,7 +32,9 @@ func main() {
 		return
 	}
 
-	grpcServer, err := grpc.NewGRPCServer(&grpc.Config{
+	jwtManager := jwt.NewJWTManager("secretKey", time.Second*30)
+
+	grpcServerCfg := &grpc.Config{
 		Port: 3000,
 		KeepaliveParams: keepalive.ServerParameters{
 			MaxConnectionIdle:     100,
@@ -45,7 +47,8 @@ func main() {
 			MinTime:             10,
 			PermitWithoutStream: true,
 		},
-	})
+	}
+	grpcServer, err := grpc.NewGRPCServer(grpcServerCfg, jwtManager)
 	if err != nil {
 		slog.Error("failed initiates GRPC server", slog.String("error", err.Error()))
 		return
@@ -53,7 +56,6 @@ func main() {
 
 	userRepository := repository.NewUserRepository(dbService)
 	userManager := users.NewUserManager(userRepository)
-	jwtManager := jwt.NewJWTManager("secretKey", time.Second*30)
 
 	authController := grpcCtrl.NewAuthController(jwtManager, userManager)
 
