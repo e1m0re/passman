@@ -44,6 +44,36 @@ func (_m *DatumRepository) AddItem(ctx context.Context, datumInfo model.DatumInf
 	return r0, r1
 }
 
+// FindByUser provides a mock function with given fields: ctx, userID
+func (_m *DatumRepository) FindByUser(ctx context.Context, userID int) (*[]*model.DatumItem, error) {
+	ret := _m.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindByUser")
+	}
+
+	var r0 *[]*model.DatumItem
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int) (*[]*model.DatumItem, error)); ok {
+		return rf(ctx, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int) *[]*model.DatumItem); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]*model.DatumItem)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = rf(ctx, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FindItemByFileName provides a mock function with given fields: ctx, fileName
 func (_m *DatumRepository) FindItemByFileName(ctx context.Context, fileName string) (*model.DatumItem, error) {
 	ret := _m.Called(ctx, fileName)

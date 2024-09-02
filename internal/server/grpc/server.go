@@ -12,6 +12,7 @@ import (
 
 	"github.com/e1m0re/passman/internal/server/grpc/interceptors"
 	"github.com/e1m0re/passman/internal/server/service/jwt"
+	"github.com/e1m0re/passman/internal/server/service/users"
 )
 
 type Server interface {
@@ -69,20 +70,24 @@ func buildKeepaliveParams(config keepalive.ServerParameters) keepalive.ServerPar
 	}
 }
 
-func buildOptions(config Config, jwtManager jwt.JWTManager) ([]grpc.ServerOption, error) {
-	interceptor := interceptors.NewAuthInterceptor(jwtManager)
+func buildOptions(config Config, jwtManager jwt.JWTManager, userProvider users.UserProvider) ([]grpc.ServerOption, error) {
+	authInterceptor := interceptors.NewAuthInterceptor(jwtManager, userProvider)
 
 	return []grpc.ServerOption{
 		grpc.KeepaliveParams(buildKeepaliveParams(config.KeepaliveParams)),
 		grpc.KeepaliveEnforcementPolicy(buildKeepalivePolicy(config.KeepalivePolicy)),
-		grpc.UnaryInterceptor(interceptor.Unary()),
-		grpc.StreamInterceptor(interceptor.Stream()),
+		grpc.ChainUnaryInterceptor(
+			authInterceptor.Unary(),
+		),
+		grpc.ChainStreamInterceptor(
+			authInterceptor.Stream(),
+		),
 	}, nil
 }
 
 // NewGRPCServer initiates new instance of Server.
-func NewGRPCServer(cfg *Config, jwtManager jwt.JWTManager) (Server, error) {
-	options, err := buildOptions(*cfg, jwtManager)
+func NewGRPCServer(cfg *Config, jwtManager jwt.JWTManager, userProvider users.UserProvider) (Server, error) {
+	options, err := buildOptions(*cfg, jwtManager, userProvider)
 	if err != nil {
 		return nil, err
 	}

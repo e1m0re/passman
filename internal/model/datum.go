@@ -10,16 +10,18 @@ const (
 )
 
 type DatumInfo struct {
-	UserID   int         `db:"user"`
 	TypeID   DatumTypeID `db:"type"`
+	UserID   int         `db:"user"`
 	File     string      `db:"file"`
 	Checksum string      `db:"checksum"`
 }
 
 type DatumItem struct {
 	ID       int         `db:"id"`
-	UserID   int         `db:"user"`
 	TypeID   DatumTypeID `db:"type"`
+	UserID   int         `db:"user"`
 	File     string      `db:"file"`
 	Checksum string      `db:"checksum"`
 }
+
+type DatumItemsList = []*DatumItem

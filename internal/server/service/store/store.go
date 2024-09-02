@@ -16,27 +16,34 @@ import (
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=StoreService
-type StoreService interface {
+type StoreManager interface {
 	// AddItem creates new datum item.
 	AddItem(ctx context.Context, datumInfo model.DatumInfo) (*model.DatumItem, error)
+	// GetUsersDataItemsList returns all data items by user ID.
+	GetUsersDataItemsList(ctx context.Context, userID int) (*model.DatumItemsList, error)
 	// SaveFile creates new file from stream.
 	SaveFile(ctx context.Context, stream proto.StoreService_UploadItemServer) (os.FileInfo, error)
 	// UploadFile sends file to stream.
 	UploadFile(ctx context.Context, id string, stream proto.StoreService_DownloadItemServer) error
 }
 
-type storeService struct {
+type storeManger struct {
 	workDir         string
 	datumRepository repository.DatumRepository
 }
 
 // AddItem creates new datum item.
-func (s storeService) AddItem(ctx context.Context, datumInfo model.DatumInfo) (*model.DatumItem, error) {
-	return s.datumRepository.AddItem(ctx, datumInfo)
+func (sm storeManger) AddItem(ctx context.Context, datumInfo model.DatumInfo) (*model.DatumItem, error) {
+	return sm.datumRepository.AddItem(ctx, datumInfo)
+}
+
+// GetUsersDataItemsList returns all data items by user ID.
+func (sm storeManger) GetUsersDataItemsList(ctx context.Context, userID int) (*model.DatumItemsList, error) {
+	return sm.datumRepository.FindByUser(ctx, userID)
 }
 
 // SaveFile creates new file from stream.
-func (s storeService) SaveFile(ctx context.Context, stream proto.StoreService_UploadItemServer) (os.FileInfo, error) {
+func (sm storeManger) SaveFile(ctx context.Context, stream proto.StoreService_UploadItemServer) (os.FileInfo, error) {
 	userId := 1
 	var file *os.File
 
@@ -53,7 +60,7 @@ func (s storeService) SaveFile(ctx context.Context, stream proto.StoreService_Up
 		}
 
 		if file == nil {
-			file, err = os.Create(filepath.Join(s.workDir, strconv.Itoa(userId), req.GetId()))
+			file, err = os.Create(filepath.Join(sm.workDir, strconv.Itoa(userId), req.GetId()))
 			if err != nil {
 				return nil, fmt.Errorf("prepare file failed: %w", err)
 			}
@@ -81,7 +88,7 @@ func (s storeService) SaveFile(ctx context.Context, stream proto.StoreService_Up
 		return nil, fmt.Errorf("checksum calculation failed: %w", err)
 	}
 
-	_, err = s.datumRepository.AddItem(ctx, model.DatumInfo{
+	_, err = sm.datumRepository.AddItem(ctx, model.DatumInfo{
 		UserID:   userId,
 		TypeID:   model.TextItem,
 		File:     fileInfo.Name(),
@@ -95,9 +102,9 @@ func (s storeService) SaveFile(ctx context.Context, stream proto.StoreService_Up
 }
 
 // UploadFile sends file to stream.
-func (s storeService) UploadFile(ctx context.Context, id string, stream proto.StoreService_DownloadItemServer) error {
+func (sm storeManger) UploadFile(ctx context.Context, id string, stream proto.StoreService_DownloadItemServer) error {
 	userId := 1
-	datumItem, err := s.datumRepository.FindItemByFileName(ctx, id)
+	datumItem, err := sm.datumRepository.FindItemByFileName(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -106,7 +113,7 @@ func (s storeService) UploadFile(ctx context.Context, id string, stream proto.St
 		return fmt.Errorf("file not found")
 	}
 
-	filePath := filepath.Join(s.workDir, strconv.Itoa(userId), id)
+	filePath := filepath.Join(sm.workDir, strconv.Itoa(userId), id)
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		return err
@@ -141,11 +148,11 @@ func (s storeService) UploadFile(ctx context.Context, id string, stream proto.St
 	return nil
 }
 
-var _ StoreService = (*storeService)(nil)
+var _ StoreManager = (*storeManger)(nil)
 
-// NewStoreService initiates new instance of StoreService.
-func NewStoreService(workDir string, datumRepository repository.DatumRepository) StoreService {
-	return &storeService{
+// NewStoreManager initiates new instance of StoreManager.
+func NewStoreManager(workDir string, datumRepository repository.DatumRepository) StoreManager {
+	return &storeManger{
 		workDir:         workDir,
 		datumRepository: datumRepository,
 	}

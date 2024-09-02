@@ -20,4 +20,6 @@ type DatumRepository interface {
 	AddItem(ctx context.Context, datumInfo model.DatumInfo) (*model.DatumItem, error)
 	// FindItemByFileName finds and returns users data item by filename.
 	FindItemByFileName(ctx context.Context, fileName string) (*model.DatumItem, error)
+	// FindByUser returns all data items by user ID.
+	FindByUser(ctx context.Context, userID int) (*model.DatumItemsList, error)
 }

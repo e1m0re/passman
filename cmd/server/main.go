@@ -48,19 +48,20 @@ func main() {
 			PermitWithoutStream: true,
 		},
 	}
-	grpcServer, err := grpc.NewGRPCServer(grpcServerCfg, jwtManager)
+
+	userRepository := repository.NewUserRepository(dbService)
+	userProvider := users.NewUserProvider(userRepository)
+
+	datumRepository := repository.NewDatumRepository(dbService)
+	storeService := store.NewStoreManager("/Users/elmore/passman/server", datumRepository)
+
+	grpcServer, err := grpc.NewGRPCServer(grpcServerCfg, jwtManager, userProvider)
 	if err != nil {
 		slog.Error("failed initiates GRPC server", slog.String("error", err.Error()))
 		return
 	}
 
-	userRepository := repository.NewUserRepository(dbService)
-	userManager := users.NewUserManager(userRepository)
-
-	authController := grpcCtrl.NewAuthController(jwtManager, userManager)
-
-	datumRepository := repository.NewDatumRepository(dbService)
-	storeService := store.NewStoreService("/Users/elmore/passman/server", datumRepository)
+	authController := grpcCtrl.NewAuthController(jwtManager, userProvider)
 	storeController := grpcCtrl.NewStoreController(storeService)
 
 	go grpcServer.Start(

@@ -10,8 +10,8 @@ import (
 	"github.com/e1m0re/passman/internal/server/repository"
 )
 
-//go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=UserManager
-type UserManager interface {
+//go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=UserProvider
+type UserProvider interface {
 	// CreateUser creates new user.
 	CreateUser(ctx context.Context, credentials model.Credentials) (*model.User, error)
 	// FindUserByUsername finds user by username.
@@ -20,12 +20,12 @@ type UserManager interface {
 	CheckPassword(ctx context.Context, user model.User, password string) (ok bool, err error)
 }
 
-type userManager struct {
+type userProvider struct {
 	userRepository repository.UserRepository
 }
 
 // CreateUser creates new user.
-func (um userManager) CreateUser(ctx context.Context, credentials model.Credentials) (*model.User, error) {
+func (up userProvider) CreateUser(ctx context.Context, credentials model.Credentials) (*model.User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credentials.Password), 10)
 	if err != nil {
 		return nil, fmt.Errorf("cannot hash password: %w", err)
@@ -33,16 +33,16 @@ func (um userManager) CreateUser(ctx context.Context, credentials model.Credenti
 
 	credentials.Password = string(hashedPassword)
 
-	return um.userRepository.AddUser(ctx, credentials)
+	return up.userRepository.AddUser(ctx, credentials)
 }
 
 // FindUserByUsername finds user by username.
-func (um userManager) FindUserByUsername(ctx context.Context, username string) (*model.User, error) {
-	return um.userRepository.FindUserByUsername(ctx, username)
+func (up userProvider) FindUserByUsername(ctx context.Context, username string) (*model.User, error) {
+	return up.userRepository.FindUserByUsername(ctx, username)
 }
 
 // CheckPassword validate specified users password.
-func (um userManager) CheckPassword(ctx context.Context, user model.User, password string) (ok bool, err error) {
+func (up userProvider) CheckPassword(ctx context.Context, user model.User, password string) (ok bool, err error) {
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return false, err
@@ -51,11 +51,11 @@ func (um userManager) CheckPassword(ctx context.Context, user model.User, passwo
 	return true, err
 }
 
-var _ UserManager = (*userManager)(nil)
+var _ UserProvider = (*userProvider)(nil)
 
-// NewUserManager initiates new instance of UserManager.
-func NewUserManager(userRepository repository.UserRepository) UserManager {
-	return &userManager{
+// NewUserProvider initiates new instance of UserProvider.
+func NewUserProvider(userRepository repository.UserRepository) UserProvider {
+	return &userProvider{
 		userRepository: userRepository,
 	}
 }

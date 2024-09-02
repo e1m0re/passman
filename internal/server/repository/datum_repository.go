@@ -48,6 +48,18 @@ func (repo datumRepository) FindItemByFileName(ctx context.Context, fileName str
 	}
 }
 
+// FindByUser returns all data items by user ID.
+func (repo datumRepository) FindByUser(ctx context.Context, userID int) (*model.DatumItemsList, error) {
+	result := make(model.DatumItemsList, 0)
+	query := "SELECT id, type, \"user\", file, checksum FROM users_data WHERE \"user\" = $1"
+	err := repo.db.GetDB().SelectContext(ctx, &result, query, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 var _ DatumRepository = (*datumRepository)(nil)
 
 // NewDatumRepository initiates new instance of DatumRepository.

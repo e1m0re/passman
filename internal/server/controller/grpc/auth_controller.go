@@ -16,8 +16,8 @@ import (
 )
 
 type authController struct {
-	jwtManager  jwt.JWTManager
-	userManager users.UserManager
+	jwtManager   jwt.JWTManager
+	userProvider users.UserProvider
 
 	proto.UnimplementedAuthServiceServer
 }
@@ -28,7 +28,7 @@ func (ac *authController) SignUp(ctx context.Context, req *proto.SignUpRequest) 
 		Username: req.GetUsername(),
 	}
 
-	_, err := ac.userManager.CreateUser(ctx, credentials)
+	_, err := ac.userProvider.CreateUser(ctx, credentials)
 	if err != nil {
 		return &proto.SignUpResponse{
 			Status:  proto.StatusCode(codes.Internal),
@@ -40,7 +40,7 @@ func (ac *authController) SignUp(ctx context.Context, req *proto.SignUpRequest) 
 }
 
 func (ac *authController) Login(ctx context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error) {
-	user, err := ac.userManager.FindUserByUsername(ctx, req.GetUsername())
+	user, err := ac.userProvider.FindUserByUsername(ctx, req.GetUsername())
 	if err != nil {
 		if errors.Is(err, repository.ErrorEntityNotFound) {
 			return &proto.LoginResponse{
@@ -53,7 +53,7 @@ func (ac *authController) Login(ctx context.Context, req *proto.LoginRequest) (*
 		}, err
 	}
 
-	ok, err := ac.userManager.CheckPassword(ctx, *user, req.GetPassword())
+	ok, err := ac.userProvider.CheckPassword(ctx, *user, req.GetPassword())
 	if err != nil {
 		return &proto.LoginResponse{
 			Status: proto.StatusCode(codes.Internal),
@@ -83,9 +83,9 @@ func (ac *authController) Login(ctx context.Context, req *proto.LoginRequest) (*
 var _ proto.AuthServiceServer = (*authController)(nil)
 
 // NewAuthController initiates new instance of AuthServiceServer.
-func NewAuthController(jwtManager jwt.JWTManager, userManager users.UserManager) proto.AuthServiceServer {
+func NewAuthController(jwtManager jwt.JWTManager, userProvider users.UserProvider) proto.AuthServiceServer {
 	return &authController{
-		jwtManager:  jwtManager,
-		userManager: userManager,
+		jwtManager:   jwtManager,
+		userProvider: userProvider,
 	}
 }

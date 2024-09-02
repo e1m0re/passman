@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"google.golang.org/grpc"
@@ -42,7 +43,7 @@ func (a app) Start(ctx context.Context) error {
 		return fmt.Errorf("create interceptors failed: %w", err)
 	}
 
-	_, err = grpc.NewClient(
+	secConnection, err := grpc.NewClient(
 		server,
 		transportOption,
 		grpc.WithUnaryInterceptor(interceptor.Unary()),
@@ -52,9 +53,17 @@ func (a app) Start(ctx context.Context) error {
 		return err
 	}
 
-	//_ := grpcclient.NewStoreClient(secConnection, a.cfg.GRPCConfig.WorkDir)
+	storeClient := grpcclient.NewStoreClient(secConnection, a.cfg.GRPCConfig.WorkDir)
+	dataItems, err := storeClient.GetItemsList(ctx)
+	if err != nil {
+		slog.Error("getting data info from server failed", slog.String("error", err.Error()))
+	}
 
-	time.Sleep(60 * time.Second)
+	for _, item := range dataItems {
+		slog.Info("item", slog.String("data", fmt.Sprintf("%v", item)))
+	}
+
+	time.Sleep(40 * time.Second)
 
 	return nil
 }

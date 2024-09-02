@@ -3,6 +3,7 @@ package grpc
 import (
 	"bytes"
 	"context"
+	"github.com/e1m0re/passman/internal/model"
 	"io"
 	"log/slog"
 	"os"
@@ -18,6 +19,25 @@ import (
 type StoreClient struct {
 	service proto.StoreServiceClient
 	workDir string
+}
+
+// GetItemsList request items list from server.
+func (client *StoreClient) GetItemsList(ctx context.Context) ([]*model.DatumInfo, error) {
+	response, err := client.service.GetItemsList(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.DatumInfo, response.GetCount())
+	for idx, datum := range response.GetItemsInfo() {
+		result[idx] = &model.DatumInfo{
+			TypeID:   model.DatumTypeID(datum.ItemType),
+			UserID:   1,
+			File:     datum.File,
+			Checksum: datum.Checksum,
+		}
+	}
+	return result, nil
 }
 
 // UploadItem send file to server.
