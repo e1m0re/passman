@@ -34,3 +34,7 @@ type CredentialItemData struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type TextItemData struct {
+	Text string `json:"text"`
+}
