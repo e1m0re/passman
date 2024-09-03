@@ -22,9 +22,9 @@ type StoreManager interface {
 	// GetUsersDataItemsList returns all data items by user ID.
 	GetUsersDataItemsList(ctx context.Context, userID int) (*model.DatumItemsList, error)
 	// SaveFile creates new file from stream.
-	SaveFile(ctx context.Context, stream proto.StoreService_UploadItemServer) (os.FileInfo, error)
+	SaveFile(ctx context.Context, userID int, stream proto.StoreService_UploadItemServer) (os.FileInfo, error)
 	// UploadFile sends file to stream.
-	UploadFile(ctx context.Context, id string, stream proto.StoreService_DownloadItemServer) error
+	UploadFile(ctx context.Context, userID int, guid string, stream proto.StoreService_DownloadItemServer) error
 }
 
 type storeManger struct {
@@ -43,8 +43,7 @@ func (sm storeManger) GetUsersDataItemsList(ctx context.Context, userID int) (*m
 }
 
 // SaveFile creates new file from stream.
-func (sm storeManger) SaveFile(ctx context.Context, stream proto.StoreService_UploadItemServer) (os.FileInfo, error) {
-	userId := 1
+func (sm storeManger) SaveFile(ctx context.Context, userID int, stream proto.StoreService_UploadItemServer) (os.FileInfo, error) {
 	var file *os.File
 
 	fileSize := uint32(0)
@@ -60,7 +59,7 @@ func (sm storeManger) SaveFile(ctx context.Context, stream proto.StoreService_Up
 		}
 
 		if file == nil {
-			file, err = os.Create(filepath.Join(sm.workDir, strconv.Itoa(userId), req.GetId()))
+			file, err = os.Create(filepath.Join(sm.workDir, strconv.Itoa(userID), req.GetId()))
 			if err != nil {
 				return nil, fmt.Errorf("prepare file failed: %w", err)
 			}
@@ -89,7 +88,7 @@ func (sm storeManger) SaveFile(ctx context.Context, stream proto.StoreService_Up
 	}
 
 	_, err = sm.datumRepository.AddItem(ctx, model.DatumInfo{
-		UserID:   userId,
+		UserID:   userID,
 		TypeID:   model.TextItem,
 		File:     fileInfo.Name(),
 		Checksum: checksum,
@@ -102,18 +101,17 @@ func (sm storeManger) SaveFile(ctx context.Context, stream proto.StoreService_Up
 }
 
 // UploadFile sends file to stream.
-func (sm storeManger) UploadFile(ctx context.Context, id string, stream proto.StoreService_DownloadItemServer) error {
-	userId := 1
-	datumItem, err := sm.datumRepository.FindItemByFileName(ctx, id)
+func (sm storeManger) UploadFile(ctx context.Context, userID int, guid string, stream proto.StoreService_DownloadItemServer) error {
+	datumItem, err := sm.datumRepository.FindItemByFileName(ctx, guid)
 	if err != nil {
 		return err
 	}
 
-	if datumItem == nil || datumItem.UserID != userId {
+	if datumItem == nil || datumItem.UserID != userID {
 		return fmt.Errorf("file not found")
 	}
 
-	filePath := filepath.Join(sm.workDir, strconv.Itoa(userId), id)
+	filePath := filepath.Join(sm.workDir, strconv.Itoa(userID), guid)
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		return err

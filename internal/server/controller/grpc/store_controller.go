@@ -48,7 +48,12 @@ func (sc *storeController) GetItemsList(ctx context.Context, req *proto.GetItems
 
 // UploadItem contains the logic for uploading a file to the server.
 func (sc *storeController) UploadItem(stream proto.StoreService_UploadItemServer) error {
-	fileInfo, err := sc.storeManager.SaveFile(stream.Context(), stream)
+	userID, ok := stream.Context().Value(commongrpc.UserIDMarker).(int)
+	if !ok {
+		return status.Errorf(codes.Internal, "unknown user")
+	}
+
+	fileInfo, err := sc.storeManager.SaveFile(stream.Context(), userID, stream)
 	if err != nil {
 		slog.Error("save file to store failed", slog.String("error", err.Error()))
 		return err
@@ -59,7 +64,12 @@ func (sc *storeController) UploadItem(stream proto.StoreService_UploadItemServer
 
 // DownloadItem contains the logic for downloading a file from the server.
 func (sc *storeController) DownloadItem(req *proto.DownloadItemRequest, stream proto.StoreService_DownloadItemServer) error {
-	err := sc.storeManager.UploadFile(stream.Context(), req.GetGuid(), stream)
+	userID, ok := stream.Context().Value(commongrpc.UserIDMarker).(int)
+	if !ok {
+		return status.Errorf(codes.Internal, "unknown user")
+	}
+
+	err := sc.storeManager.UploadFile(stream.Context(), userID, req.GetGuid(), stream)
 	if err != nil {
 		slog.Error("send file to client failed", slog.String("error", err.Error()))
 	}
