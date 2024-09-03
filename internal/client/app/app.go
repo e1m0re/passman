@@ -90,6 +90,7 @@ func (a *app) initTui() {
 	pages.AddPage(SelectNewItemTypePage, a.getSelectItemTypePage(), true, false)
 	pages.AddPage(AddCredentialsPage, a.getAddCredentialsPage(), true, false)
 	pages.AddPage(AddSimpleTextPage, a.getAddTextPage(), true, false)
+	pages.AddPage(AddCreditCardPage, a.getAddCreditCardPage(), true, false)
 
 	a.pages = pages
 }

@@ -23,6 +23,8 @@ func (a *app) getSelectItemTypePage() tview.Primitive {
 			a.pages.SwitchToPage(AddCredentialsPage)
 		case types[1]:
 			a.pages.SwitchToPage(AddSimpleTextPage)
+		case types[3]:
+			a.pages.SwitchToPage(AddCreditCardPage)
 		}
 	})
 

@@ -16,11 +16,12 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
 
+	os.Mkdir("./data", 0666)
 	app1 := app.NewApp(&config.AppConfig{
 		GRPCConfig: &grpc.ClientConfig{
 			Port:     3000,
-			Hostname: "localhost",
-			WorkDir:  "/Users/elmore/passman/client",
+			Hostname: "192.168.10.102",
+			WorkDir:  "./data",
 		},
 	})
 

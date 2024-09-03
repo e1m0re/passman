@@ -38,3 +38,14 @@ type CredentialItemData struct {
 type TextItemData struct {
 	Text string `json:"text"`
 }
+
+type FileItemData struct {
+	File string `json:"file"`
+}
+
+type CreditCardItemData struct {
+	Number string `json:"number"`
+	Owner  string `json:"owner"`
+	Period string `json:"period"`
+	CVV    string `json:"CVV"`
+}

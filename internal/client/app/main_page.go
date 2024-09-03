@@ -11,10 +11,11 @@ func (a *app) getMainPage() tview.Primitive {
 	var helpLine = tview.NewTextView().
 		SetTextColor(tcell.ColorGreen).
 		SetText("(a) to add a new item\t(q) to quit")
+	helpLine.SetBorder(true)
 
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(a.itemsListView, 0, 1, true).
+		AddItem(a.itemsListView, 0, 5, true).
 		AddItem(helpLine, 0, 1, false)
 
 	flex.SetBorder(true).SetTitle(fmt.Sprintf("Passman %s (build by %s)", BuildVersion, BuildDate))
