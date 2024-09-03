@@ -42,9 +42,9 @@ func (a *app) getAddFilePage() tview.Primitive {
 	}
 
 	metadata := model.DatumMetadata{
-		Title:    "",
-		Type:     model.DatumTypeFile,
-		FileType: "",
+		Title: "",
+		Type:  model.DatumTypeFile,
+		File:  "",
 	}
 
 	form := tview.NewForm().
@@ -57,7 +57,7 @@ func (a *app) getAddFilePage() tview.Primitive {
 		AddButton("Save", func() {
 			go func() {
 				a.app.QueueUpdateDraw(func() {
-					metadata.FileType = filepath.Ext(data.File)
+					metadata.File = filepath.Base(data.File)
 					guid := uuid.New().String()
 
 					err := copyFileContents(data.File, filepath.Join(a.cfg.GRPCConfig.WorkDir, guid))

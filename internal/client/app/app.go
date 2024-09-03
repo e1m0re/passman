@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/rivo/tview"
 	"google.golang.org/grpc"
@@ -49,13 +50,20 @@ func (a *app) InitStoreClient(ctx context.Context, token string) error {
 	}
 
 	a.storeClient = grpcclient.NewStoreClient(secConnection, a.cfg.GRPCConfig.WorkDir)
-	items, err := a.storeClient.GetItemsList(ctx)
-	if err != nil {
-		return err
-	}
 
-	a.store.UpdateList(items)
-	a.updateItemsListView()
+	go func() {
+		a.syncItemsList(ctx)
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(a.cfg.SyncInterval):
+				// todo обработка ошибок
+				a.syncItemsList(ctx)
+			}
+		}
+	}()
 
 	return nil
 }

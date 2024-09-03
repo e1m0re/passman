@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/e1m0re/passman/internal/client/app"
 	"github.com/e1m0re/passman/internal/client/config"
@@ -23,6 +24,7 @@ func main() {
 			Hostname: "192.168.10.102",
 			WorkDir:  "./data",
 		},
+		SyncInterval: 15 * time.Second,
 	})
 
 	err := app1.Run(ctx)

@@ -25,9 +25,9 @@ type DatumItem struct {
 type DatumItemsList = []*DatumItem
 
 type DatumMetadata struct {
-	Title    string `json:"title"`
-	FileType string `json:"fileType,omitempty"`
-	Type     int    `json:"type"`
+	Title string `json:"title"`
+	File  string `json:"file,omitempty"`
+	Type  int    `json:"type"`
 }
 
 type CredentialItemData struct {

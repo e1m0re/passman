@@ -32,6 +32,8 @@ func (a *app) updateItemsListView() {
 		a.itemsListView.AddItem(metadata.Title, typesDescriptionMap[metadata.Type], rune(49+idx), nil)
 		idx++
 	}
+
+	a.app.Draw()
 }
 
 func (a *app) uploadItemToServer(data any, metadata model.DatumMetadata) error {
@@ -61,6 +63,18 @@ func (a *app) uploadFileToServer(id string, metadata model.DatumMetadata) error 
 		File:     id,
 		Checksum: checksum,
 	})
+	a.updateItemsListView()
+
+	return nil
+}
+
+func (a *app) syncItemsList(ctx context.Context) error {
+	items, err := a.storeClient.GetItemsList(ctx)
+	if err != nil {
+		return err
+	}
+
+	a.store.UpdateList(items)
 	a.updateItemsListView()
 
 	return nil
