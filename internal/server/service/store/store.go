@@ -60,8 +60,10 @@ func (sm storeManger) SaveFile(ctx context.Context, userID int, stream proto.Sto
 		}
 
 		if file == nil {
+			dir := filepath.Join(sm.workDir, strconv.Itoa(userID))
+			os.Mkdir(dir, 0660)
 			metadata = req.GetMetadata()
-			file, err = os.Create(filepath.Join(sm.workDir, strconv.Itoa(userID), req.GetId()))
+			file, err = os.Create(filepath.Join(dir, req.GetId()))
 			if err != nil {
 				return nil, fmt.Errorf("prepare file failed: %w", err)
 			}

@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	BuildVersion = "0.0.1"
-	BuildDate    = "03.09.2024"
+	BuildVersion = "N/A"
+	BuildDate    = "N/A"
 )
 
 type App interface {
@@ -27,7 +27,7 @@ type app struct {
 	pages         *tview.Pages
 	itemsListView *tview.List
 
-	cfg *config.AppConfig
+	cfg *config.Config
 
 	authInterceptor *grpcclient.AuthInterceptor
 	authClient      *grpcclient.AuthClient
@@ -40,7 +40,7 @@ type app struct {
 func (a *app) InitStoreClient(ctx context.Context, token string) error {
 	a.authInterceptor = grpcclient.NewAuthInterceptor(token)
 	secConnection, err := grpc.NewClient(
-		a.cfg.GRPCConfig.GetServer(),
+		a.cfg.GetServer(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(a.authInterceptor.Unary()),
 		grpc.WithStreamInterceptor(a.authInterceptor.Stream()),
@@ -49,16 +49,17 @@ func (a *app) InitStoreClient(ctx context.Context, token string) error {
 		return err
 	}
 
-	a.storeClient = grpcclient.NewStoreClient(secConnection, a.cfg.GRPCConfig.WorkDir)
+	a.storeClient = grpcclient.NewStoreClient(secConnection, a.cfg.App.WorkDir)
 
 	go func() {
 		a.syncItemsList(ctx)
+		a.app.Draw()
 
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-time.After(a.cfg.SyncInterval):
+			case <-time.After(a.cfg.Server.SyncInterval):
 				// todo обработка ошибок
 				a.syncItemsList(ctx)
 			}
@@ -71,7 +72,7 @@ func (a *app) InitStoreClient(ctx context.Context, token string) error {
 // Run starts client application.
 func (a *app) Run(ctx context.Context) error {
 
-	anonConnection, err := grpc.NewClient(a.cfg.GRPCConfig.GetServer(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	anonConnection, err := grpc.NewClient(a.cfg.GetServer(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
@@ -105,7 +106,7 @@ func (a *app) initTui() {
 }
 
 // NewApp initiates new instance of App.
-func NewApp(cfg *config.AppConfig) App {
+func NewApp(cfg *config.Config) App {
 	app := &app{
 		cfg:   cfg,
 		store: NewStore(),

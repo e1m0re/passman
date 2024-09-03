@@ -32,14 +32,12 @@ func (a *app) updateItemsListView() {
 		a.itemsListView.AddItem(metadata.Title, typesDescriptionMap[metadata.Type], rune(49+idx), nil)
 		idx++
 	}
-
-	a.app.Draw()
 }
 
 func (a *app) uploadItemToServer(data any, metadata model.DatumMetadata) error {
 	id := uuid.New().String()
 	jsonData, _ := json.Marshal(data)
-	filePath := filepath.Join(a.cfg.GRPCConfig.WorkDir, id)
+	filePath := filepath.Join(a.cfg.App.WorkDir, id)
 	err := os.WriteFile(filePath, jsonData, 0660)
 	if err != nil {
 		return err
@@ -50,7 +48,7 @@ func (a *app) uploadItemToServer(data any, metadata model.DatumMetadata) error {
 
 func (a *app) uploadFileToServer(id string, metadata model.DatumMetadata) error {
 	ctx := context.Background()
-	filePath := filepath.Join(a.cfg.GRPCConfig.WorkDir, id)
+	filePath := filepath.Join(a.cfg.App.WorkDir, id)
 	jsonMetadata, _ := json.Marshal(metadata)
 	err := a.storeClient.UploadItem(ctx, id, string(jsonMetadata))
 	if err != nil {

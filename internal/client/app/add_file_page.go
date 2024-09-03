@@ -60,7 +60,7 @@ func (a *app) getAddFilePage() tview.Primitive {
 					metadata.File = filepath.Base(data.File)
 					guid := uuid.New().String()
 
-					err := copyFileContents(data.File, filepath.Join(a.cfg.GRPCConfig.WorkDir, guid))
+					err := copyFileContents(data.File, filepath.Join(a.cfg.App.WorkDir, guid))
 					if err != nil {
 						statusStr.SetText(err.Error())
 						return

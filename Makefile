@@ -12,11 +12,12 @@ build-server:
 
 build-client:
 	rm ./bin/* ;\
-	GOOS=windows GOARCH=386 go build -o bin/client_win_x86.exe cmd/client/main.go ;\
-	GOOS=windows GOARCH=amd64 go build -o bin/client_win_x64.exe cmd/client/main.go ;\
-	GOOS=linux GOARCH=amd64 go build -o bin/client_linux_x64 cmd/client/main.go ;\
-	GOOS=darwin GOARCH=amd64 go build -o bin/client_mac_x64 cmd/client/main.go ;\
-	go build -o bin/client_mac_arm cmd/client/main.go ;\
+	GOOS=windows GOARCH=386 go build -ldflags "-X github.com/e1m0re/passman/internal/client/app.BuildVersion=0.1.0 -X github.com/e1m0re/passman/internal/client/app.BuildDate=03.09.2024"  -o bin/client_win_x86.exe cmd/client/main.go ;\
+	GOOS=windows GOARCH=amd64 go build -ldflags "-X github.com/e1m0re/passman/internal/client/app.BuildVersion=0.1.0 -X github.com/e1m0re/passman/internal/client/app.BuildDate=03.09.2024"  -o bin/client_win_x64.exe cmd/client/main.go ;\
+	GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/e1m0re/passman/internal/client/app.BuildVersion=0.1.0 -X github.com/e1m0re/passman/internal/client/app.BuildDate=03.09.2024"  -o bin/client_linux_x64 cmd/client/main.go ;\
+	GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/e1m0re/passman/internal/client/app.BuildVersion=0.1.0 -X github.com/e1m0re/passman/internal/client/app.BuildDate=03.09.2024"  -o bin/client_mac_x64 cmd/client/main.go ;\
+	go build -ldflags "-X github.com/e1m0re/passman/internal/client/app.BuildVersion=0.1.0 -X github.com/e1m0re/passman/internal/client/app.BuildDate=03.09.2024" -o bin/client_mac_arm cmd/client/main.go ;\
+	cp config/passman.yml bin/
 
 statickcheck:
 	go run cmd/staticlint/main.go ./...

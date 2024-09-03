@@ -4,9 +4,14 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - "80:80"
+      - "5000:5000"
+    volumes:
+      - passman-data:/data
     depends_on:
       - db
+    environment:
+      - DATABASE_DSN=${DATABASE_DSN}
+      - STORAGE_PATH=${STORAGE_PATH}
   db:
     image: postgres:latest
     ports:
@@ -19,4 +24,5 @@ services:
       - POSTGRES_DB=${DB_NAME}
 
 volumes:
+  passman-data:
   postgres-db:

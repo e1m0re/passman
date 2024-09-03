@@ -2,6 +2,8 @@ package main
 
 import (
 	"log/slog"
+	"os"
+	"strconv"
 	"time"
 
 	googleGrpc "google.golang.org/grpc"
@@ -20,9 +22,8 @@ import (
 
 func main() {
 	dbService, err := db.NewDBService(db.DatabaseConfig{
-		Driver: "pgx",
-		//Url:                     os.Getenv("DATABASE_DSN"),
-		Url:                     "postgresql://passman:passman@127.0.0.1:5432/passman?sslmode=disable",
+		Driver:                  "pgx",
+		Url:                     os.Getenv("DATABASE_DSN"),
 		ConnMaxLifetimeInMinute: 3,
 		MaxOpenConnections:      10,
 		MaxIdleConnections:      1,
@@ -33,9 +34,14 @@ func main() {
 	}
 
 	jwtManager := jwt.NewJWTManager("secretKey", time.Minute*30)
+	port, err := strconv.Atoi(os.Getenv("GRPC_SERVER_PORT"))
+	if err != nil {
+		slog.Error("invalid grpc port")
+		return
+	}
 
 	grpcServerCfg := &grpc.Config{
-		Port: 3000,
+		Port: uint32(port),
 		KeepaliveParams: keepalive.ServerParameters{
 			MaxConnectionIdle:     100,
 			MaxConnectionAge:      7200,
@@ -53,7 +59,7 @@ func main() {
 	userProvider := users.NewUserProvider(userRepository)
 
 	datumRepository := repository.NewDatumRepository(dbService)
-	storeService := store.NewStoreManager("/Users/elmore/passman/server", datumRepository)
+	storeService := store.NewStoreManager(os.Getenv("STORAGE_PATH"), datumRepository)
 
 	grpcServer, err := grpc.NewGRPCServer(grpcServerCfg, jwtManager, userProvider)
 	if err != nil {
