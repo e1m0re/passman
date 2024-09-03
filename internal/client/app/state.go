@@ -12,6 +12,18 @@ type Store struct {
 	sync.RWMutex
 }
 
+func (s *Store) GetItemById(id string) *model.DatumInfo {
+	s.RWMutex.RLock()
+	defer s.RWMutex.RUnlock()
+
+	v, ok := s.itemsList[id]
+	if !ok {
+		return nil
+	}
+
+	return v
+}
+
 func (s *Store) AddItem(datum *model.DatumInfo) {
 	s.itemsList[datum.File] = datum
 }

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -29,7 +30,13 @@ func (a *app) updateItemsListView() {
 		if err != nil {
 			continue
 		}
-		a.itemsListView.AddItem(metadata.Title, typesDescriptionMap[metadata.Type], rune(49+idx), nil)
+		a.itemsListView.AddItem(
+			fmt.Sprintf("%s: %s", typesDescriptionMap[metadata.Type], metadata.Title),
+			item.File,
+			rune(49+idx),
+			nil,
+		)
+
 		idx++
 	}
 }

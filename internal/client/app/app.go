@@ -91,6 +91,7 @@ var _ App = (*app)(nil)
 func (a *app) initTui() {
 	a.app = tview.NewApplication()
 	a.itemsListView = tview.NewList()
+	a.itemsListView.SetBorder(true).SetTitle("List items")
 
 	pages := tview.NewPages()
 	pages.AddPage(LoginPage, a.getLoginForm(), true, true)
