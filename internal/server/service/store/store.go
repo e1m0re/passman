@@ -12,7 +12,7 @@ import (
 	"github.com/e1m0re/passman/internal/model"
 	"github.com/e1m0re/passman/internal/server/repository"
 	"github.com/e1m0re/passman/internal/tools/encrypt"
-	proto "github.com/e1m0re/passman/proto"
+	"github.com/e1m0re/passman/proto"
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=StoreService
@@ -45,6 +45,7 @@ func (sm storeManger) GetUsersDataItemsList(ctx context.Context, userID int) (*m
 // SaveFile creates new file from stream.
 func (sm storeManger) SaveFile(ctx context.Context, userID int, stream proto.StoreService_UploadItemServer) (os.FileInfo, error) {
 	var file *os.File
+	var metadata string
 
 	fileSize := uint32(0)
 	fileSize1 := 0
@@ -59,6 +60,7 @@ func (sm storeManger) SaveFile(ctx context.Context, userID int, stream proto.Sto
 		}
 
 		if file == nil {
+			metadata = req.GetMetadata()
 			file, err = os.Create(filepath.Join(sm.workDir, strconv.Itoa(userID), req.GetId()))
 			if err != nil {
 				return nil, fmt.Errorf("prepare file failed: %w", err)
@@ -90,6 +92,7 @@ func (sm storeManger) SaveFile(ctx context.Context, userID int, stream proto.Sto
 	_, err = sm.datumRepository.AddItem(ctx, model.DatumInfo{
 		UserID:   userID,
 		TypeID:   model.TextItem,
+		Metadata: metadata,
 		File:     fileInfo.Name(),
 		Checksum: checksum,
 	})

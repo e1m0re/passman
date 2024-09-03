@@ -43,6 +43,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 				data: model.DatumInfo{
 					TypeID:   model.TextItem,
 					UserID:   1,
+					Metadata: "",
 					File:     "",
 					Checksum: "",
 				},
@@ -54,7 +55,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 				repo := repository.NewDatumRepository(mockDBService)
 
 				mock.
-					ExpectQuery("^INSERT INTO users_data \\(type, \"user\", file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4\\) RETURNING id$").
+					ExpectQuery("^INSERT INTO users_data \\(type, \"user\", metadata, file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\) RETURNING id$").
 					WillReturnError(errors.New("something wrong"))
 
 				return repo
@@ -71,6 +72,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 				data: model.DatumInfo{
 					TypeID:   model.TextItem,
 					UserID:   1,
+					Metadata: "",
 					File:     "",
 					Checksum: "",
 				},
@@ -84,7 +86,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 				rows := mock.NewRows([]string{"id"}).AddRow("1")
 
 				mock.
-					ExpectQuery("^INSERT INTO users_data \\(type, \"user\", file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4\\) RETURNING id$").
+					ExpectQuery("^INSERT INTO users_data \\(type, \"user\", metadata, file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\) RETURNING id$").
 					WillReturnRows(rows)
 
 				return repo
@@ -94,6 +96,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 					ID:       1,
 					TypeID:   model.TextItem,
 					UserID:   1,
+					Metadata: "",
 					File:     "",
 					Checksum: "",
 				},
@@ -186,8 +189,8 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 
 				repo := repository.NewDatumRepository(mockDBService)
 
-				rows := sqlxmock.NewRows([]string{"id", "type", "user", "file", "checksum"}).
-					AddRow("1", "1", "1", "1", "")
+				rows := sqlxmock.NewRows([]string{"id", "type", "user", "metadata", "file", "checksum"}).
+					AddRow("1", "1", "1", "", "1", "")
 				mock.
 					ExpectQuery("^SELECT \\* FROM users_data WHERE file = \\$1 LIMIT 1$").
 					WillReturnRows(rows)
@@ -203,6 +206,7 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 					ID:       1,
 					TypeID:   model.TextItem,
 					UserID:   1,
+					Metadata: "",
 					File:     "1",
 					Checksum: "",
 				},

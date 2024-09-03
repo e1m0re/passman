@@ -24,7 +24,7 @@ generate:
 	go generate ./...
 
 migrates:
-	goose -dir internal/db/migrations postgres "postgresql://passman:passman@127.0.0.1:5432/passman?sslmode=disable" up
+	goose -dir internal/server/db/migrations postgres "postgresql://passman:passman@127.0.0.1:5432/passman?sslmode=disable" up
 
 grpc-gen:
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/*.proto

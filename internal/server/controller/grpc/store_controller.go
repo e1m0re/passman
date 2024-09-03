@@ -36,7 +36,7 @@ func (sc *storeController) GetItemsList(ctx context.Context, req *proto.GetItems
 		responseData[idx] = &proto.ItemInfo{
 			Id:       item.File,
 			ItemType: proto.ItemType(item.TypeID),
-			File:     item.File,
+			Metadata: item.Metadata,
 			Checksum: item.Checksum,
 		}
 	}

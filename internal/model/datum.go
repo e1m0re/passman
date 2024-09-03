@@ -12,6 +12,7 @@ const (
 type DatumInfo struct {
 	TypeID   DatumTypeID `db:"type"`
 	UserID   int         `db:"user"`
+	Metadata string      `db:"metadata"`
 	File     string      `db:"file"`
 	Checksum string      `db:"checksum"`
 }
@@ -20,6 +21,7 @@ type DatumItem struct {
 	ID       int         `db:"id"`
 	TypeID   DatumTypeID `db:"type"`
 	UserID   int         `db:"user"`
+	Metadata string      `db:"metadata"`
 	File     string      `db:"file"`
 	Checksum string      `db:"checksum"`
 }

@@ -18,11 +18,12 @@ func (repo datumRepository) AddItem(ctx context.Context, datumInfo model.DatumIn
 	datumItem := &model.DatumItem{
 		UserID:   datumInfo.UserID,
 		TypeID:   datumInfo.TypeID,
+		Metadata: datumInfo.Metadata,
 		File:     datumInfo.File,
 		Checksum: datumInfo.Checksum,
 	}
 
-	query := "INSERT INTO users_data (type, \"user\", file, checksum) VALUES ($1,$2,$3,$4) RETURNING id"
+	query := "INSERT INTO users_data (type, \"user\", metadata, file, checksum) VALUES ($1,$2,$3,$4,$5) RETURNING id"
 	err := repo.db.GetDB().
 		QueryRowxContext(ctx, query, datumInfo.TypeID, datumInfo.UserID, datumInfo.File, datumInfo.Checksum).
 		Scan(&datumItem.ID)
@@ -51,7 +52,7 @@ func (repo datumRepository) FindItemByFileName(ctx context.Context, fileName str
 // FindByUser returns all data items by user ID.
 func (repo datumRepository) FindByUser(ctx context.Context, userID int) (*model.DatumItemsList, error) {
 	result := make(model.DatumItemsList, 0)
-	query := "SELECT id, type, \"user\", file, checksum FROM users_data WHERE \"user\" = $1"
+	query := "SELECT id, type, \"user\", metadata, file, checksum FROM users_data WHERE \"user\" = $1"
 	err := repo.db.GetDB().SelectContext(ctx, &result, query, userID)
 	if err != nil {
 		return nil, err
