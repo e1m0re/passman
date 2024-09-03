@@ -3,13 +3,13 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"github.com/e1m0re/passman/internal/model"
-	"github.com/e1m0re/passman/internal/tools/encrypt"
-	"github.com/google/uuid"
-	"log/slog"
 	"os"
 	"path/filepath"
+
+	"github.com/google/uuid"
+
+	"github.com/e1m0re/passman/internal/model"
+	"github.com/e1m0re/passman/internal/tools/encrypt"
 )
 
 var typesDescriptionMap = map[int]string{
@@ -27,8 +27,6 @@ func (a *app) updateItemsListView() {
 		// Todo обработать ошибки
 		err := json.Unmarshal([]byte(item.Metadata), metadata)
 		if err != nil {
-			s := fmt.Sprintf("%s", err.Error())
-			slog.Info(s)
 			continue
 		}
 		a.itemsListView.AddItem(metadata.Title, typesDescriptionMap[metadata.Type], rune(49+idx), nil)
@@ -40,13 +38,19 @@ func (a *app) uploadItemToServer(data any, metadata model.DatumMetadata) error {
 	id := uuid.New().String()
 	jsonData, _ := json.Marshal(data)
 	filePath := filepath.Join(a.cfg.GRPCConfig.WorkDir, id)
-	err := os.WriteFile(filePath, jsonData, 0666)
+	err := os.WriteFile(filePath, jsonData, 0660)
 	if err != nil {
 		return err
 	}
+
+	return a.uploadFileToServer(id, metadata)
+}
+
+func (a *app) uploadFileToServer(id string, metadata model.DatumMetadata) error {
 	ctx := context.Background()
+	filePath := filepath.Join(a.cfg.GRPCConfig.WorkDir, id)
 	jsonMetadata, _ := json.Marshal(metadata)
-	err = a.storeClient.UploadItem(ctx, id, string(jsonMetadata))
+	err := a.storeClient.UploadItem(ctx, id, string(jsonMetadata))
 	if err != nil {
 		return err
 	}

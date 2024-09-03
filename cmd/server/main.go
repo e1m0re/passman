@@ -32,7 +32,7 @@ func main() {
 		return
 	}
 
-	jwtManager := jwt.NewJWTManager("secretKey", time.Second*30)
+	jwtManager := jwt.NewJWTManager("secretKey", time.Minute*30)
 
 	grpcServerCfg := &grpc.Config{
 		Port: 3000,

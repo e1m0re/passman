@@ -26,7 +26,7 @@ type DatumItemsList = []*DatumItem
 
 type DatumMetadata struct {
 	Title    string `json:"title"`
-	FileName string `json:"fileName,omitempty"`
+	FileType string `json:"fileType,omitempty"`
 	Type     int    `json:"type"`
 }
 
