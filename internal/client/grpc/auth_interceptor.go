@@ -3,7 +3,6 @@ package grpc
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	googlegrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -13,7 +12,6 @@ import (
 
 // AuthInterceptor is a client interceptor for authentication.
 type AuthInterceptor struct {
-	authClient  *AuthClient
 	accessToken string
 }
 
@@ -61,50 +59,9 @@ func (interceptor *AuthInterceptor) attachToken(ctx context.Context) context.Con
 	return metadata.AppendToOutgoingContext(ctx, "authorization", interceptor.accessToken)
 }
 
-//func (interceptor *AuthInterceptor) scheduleRefreshToken(refreshDuration time.Duration) error {
-//	err := interceptor.refreshToken()
-//	if err != nil {
-//		return err
-//	}
-//
-//	go func() {
-//		wait := refreshDuration
-//		for {
-//			time.Sleep(wait)
-//			err := interceptor.refreshToken()
-//			if err != nil {
-//				wait = time.Second
-//			} else {
-//				wait = refreshDuration
-//			}
-//		}
-//	}()
-//
-//	return nil
-//}
-
-//func (interceptor *AuthInterceptor) refreshToken() error {
-//	accessToken, err := interceptor.authClient.Login()
-//	if err != nil {
-//		return err
-//	}
-//
-//	interceptor.accessToken = accessToken
-//	slog.Debug("access token refreshed", slog.String("new toke", accessToken))
-//
-//	return nil
-//}
-
 // NewAuthInterceptor initiates a new instance of AuthInterceptor.
-func NewAuthInterceptor(authClient *AuthClient, refreshDuration time.Duration) (*AuthInterceptor, error) {
-	interceptor := &AuthInterceptor{
-		authClient: authClient,
+func NewAuthInterceptor(token string) *AuthInterceptor {
+	return &AuthInterceptor{
+		accessToken: token,
 	}
-
-	//err := interceptor.scheduleRefreshToken(refreshDuration)
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	return interceptor, nil
 }

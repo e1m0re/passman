@@ -2,8 +2,6 @@ package app
 
 import (
 	"fmt"
-	"log/slog"
-
 	"github.com/rivo/tview"
 
 	"github.com/e1m0re/passman/internal/model"
@@ -35,7 +33,9 @@ func (a *app) getLoginForm() tview.Primitive {
 						return
 					}
 
-					slog.Info("token", slog.String("a", token))
+					// Todo process error
+					a.InitStoreClient(token)
+
 					a.pages.SwitchToPage(MainPage)
 				})
 			}()
