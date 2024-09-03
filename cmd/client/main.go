@@ -24,7 +24,7 @@ func main() {
 		},
 	})
 
-	err := app1.Start(ctx)
+	err := app1.Run(ctx)
 	if err != nil {
 		slog.Error("start application failed", slog.String("error", err.Error()))
 		return

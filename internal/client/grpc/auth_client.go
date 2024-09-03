@@ -5,28 +5,24 @@ import (
 	"errors"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-
 	"github.com/e1m0re/passman/internal/model"
 	"github.com/e1m0re/passman/proto"
+	"google.golang.org/grpc"
 )
 
 // AuthClient is a client to call authentication RPC.
 type AuthClient struct {
-	service  proto.AuthServiceClient
-	username string
-	password string
+	service proto.AuthServiceClient
 }
 
 // Login does login user and returns the access token.
-func (client *AuthClient) Login() (string, error) {
+func (client *AuthClient) Login(credentials model.Credentials) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	req := &proto.LoginRequest{
-		Username: client.username,
-		Password: client.password,
+		Username: credentials.Username,
+		Password: credentials.Password,
 	}
 
 	res, err := client.service.Login(ctx, req)
@@ -38,7 +34,10 @@ func (client *AuthClient) Login() (string, error) {
 }
 
 // SignUp registers new user on the server.
-func (client *AuthClient) SignUp(ctx context.Context, credentials model.Credentials) error {
+func (client *AuthClient) SignUp(credentials model.Credentials) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	request := &proto.SignUpRequest{
 		Username: credentials.Username,
 		Password: credentials.Password,
@@ -49,7 +48,7 @@ func (client *AuthClient) SignUp(ctx context.Context, credentials model.Credenti
 		return err
 	}
 
-	if resp.Status == proto.StatusCode(codes.Internal) {
+	if resp.Status != proto.StatusCode_SUCCESS {
 		return errors.New(resp.Message)
 	}
 
@@ -57,10 +56,8 @@ func (client *AuthClient) SignUp(ctx context.Context, credentials model.Credenti
 }
 
 // NewAuthClient initiates a new instance of AuthClient.
-func NewAuthClient(cc *grpc.ClientConn, username string, password string) *AuthClient {
+func NewAuthClient(cc *grpc.ClientConn) *AuthClient {
 	return &AuthClient{
-		service:  proto.NewAuthServiceClient(cc),
-		username: username,
-		password: password,
+		service: proto.NewAuthServiceClient(cc),
 	}
 }
