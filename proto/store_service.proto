@@ -13,7 +13,6 @@ enum ItemType {
 
 message ItemInfo {
   string id = 1; // guid of item
-  ItemType item_type = 2; // type of item
   string checksum = 3; // checksum of item data
   string metadata = 4;
 }
@@ -27,7 +26,6 @@ message GetItemsListResponse {
 
 message UploadItemRequest {
   string id = 1; // guid of item
-  ItemType item_type = 2; // type of item
   bytes chunk = 3; // payload
   string metadata = 4;
 }

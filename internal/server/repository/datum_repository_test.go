@@ -41,7 +41,6 @@ func Test_datumRepository_AddItem(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				data: model.DatumInfo{
-					TypeID:   model.TextItem,
 					UserID:   1,
 					Metadata: "",
 					File:     "",
@@ -55,7 +54,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 				repo := repository.NewDatumRepository(mockDBService)
 
 				mock.
-					ExpectQuery("^INSERT INTO users_data \\(type, \"user\", metadata, file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\) RETURNING id$").
+					ExpectQuery("^INSERT INTO users_data \\(\"user\", metadata, file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4\\) RETURNING id$").
 					WillReturnError(errors.New("something wrong"))
 
 				return repo
@@ -70,7 +69,6 @@ func Test_datumRepository_AddItem(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				data: model.DatumInfo{
-					TypeID:   model.TextItem,
 					UserID:   1,
 					Metadata: "",
 					File:     "",
@@ -86,7 +84,7 @@ func Test_datumRepository_AddItem(t *testing.T) {
 				rows := mock.NewRows([]string{"id"}).AddRow("1")
 
 				mock.
-					ExpectQuery("^INSERT INTO users_data \\(type, \"user\", metadata, file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\) RETURNING id$").
+					ExpectQuery("^INSERT INTO users_data \\(\"user\", metadata, file, checksum\\) VALUES \\(\\$1,\\$2,\\$3,\\$4\\) RETURNING id$").
 					WillReturnRows(rows)
 
 				return repo
@@ -94,7 +92,6 @@ func Test_datumRepository_AddItem(t *testing.T) {
 			want: want{
 				DatumItem: &model.DatumItem{
 					ID:       1,
-					TypeID:   model.TextItem,
 					UserID:   1,
 					Metadata: "",
 					File:     "",
@@ -189,8 +186,8 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 
 				repo := repository.NewDatumRepository(mockDBService)
 
-				rows := sqlxmock.NewRows([]string{"id", "type", "user", "metadata", "file", "checksum"}).
-					AddRow("1", "1", "1", "", "1", "")
+				rows := sqlxmock.NewRows([]string{"id", "user", "metadata", "file", "checksum"}).
+					AddRow("1", "1", "", "1", "")
 				mock.
 					ExpectQuery("^SELECT \\* FROM users_data WHERE file = \\$1 LIMIT 1$").
 					WillReturnRows(rows)
@@ -204,7 +201,6 @@ func Test_datumRepository_FindItemByFileName(t *testing.T) {
 			want: want{
 				dataItem: &model.DatumItem{
 					ID:       1,
-					TypeID:   model.TextItem,
 					UserID:   1,
 					Metadata: "",
 					File:     "1",

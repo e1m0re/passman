@@ -91,7 +91,6 @@ func (sm storeManger) SaveFile(ctx context.Context, userID int, stream proto.Sto
 
 	_, err = sm.datumRepository.AddItem(ctx, model.DatumInfo{
 		UserID:   userID,
-		TypeID:   model.TextItem,
 		Metadata: metadata,
 		File:     fileInfo.Name(),
 		Checksum: checksum,

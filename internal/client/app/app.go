@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+
 	"github.com/rivo/tview"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -21,18 +22,21 @@ type App interface {
 }
 
 type app struct {
-	app   *tview.Application
-	pages *tview.Pages
+	app           *tview.Application
+	pages         *tview.Pages
+	itemsListView *tview.List
 
 	cfg *config.AppConfig
 
 	authInterceptor *grpcclient.AuthInterceptor
 	authClient      *grpcclient.AuthClient
 	storeClient     *grpcclient.StoreClient
+
+	store *Store
 }
 
 // InitStoreClient initiates client for API store.
-func (a *app) InitStoreClient(token string) error {
+func (a *app) InitStoreClient(ctx context.Context, token string) error {
 	a.authInterceptor = grpcclient.NewAuthInterceptor(token)
 	secConnection, err := grpc.NewClient(
 		a.cfg.GRPCConfig.GetServer(),
@@ -45,6 +49,13 @@ func (a *app) InitStoreClient(token string) error {
 	}
 
 	a.storeClient = grpcclient.NewStoreClient(secConnection, a.cfg.GRPCConfig.WorkDir)
+	items, err := a.storeClient.GetItemsList(ctx)
+	if err != nil {
+		return err
+	}
+
+	a.store.UpdateList(items)
+	a.updateItemsListView()
 
 	return nil
 }
@@ -70,12 +81,15 @@ var _ App = (*app)(nil)
 
 func (a *app) initTui() {
 	a.app = tview.NewApplication()
+	a.itemsListView = tview.NewList()
 
 	pages := tview.NewPages()
 	pages.AddPage(LoginPage, a.getLoginForm(), true, true)
 	pages.AddPage(RegistrationPage, a.getRegistrationForm(), true, false)
 	pages.AddPage(MainPage, a.getMainPage(), true, false)
+	pages.AddPage(SelectNewItemTypePage, a.getSelectItemTypePage(), true, false)
 	pages.AddPage(AddCredentialsPage, a.getAddCredentialsPage(), true, false)
+	pages.AddPage(AddSimpleTextPage, a.getAddTextPage(), true, false)
 
 	a.pages = pages
 }
@@ -83,7 +97,8 @@ func (a *app) initTui() {
 // NewApp initiates new instance of App.
 func NewApp(cfg *config.AppConfig) App {
 	app := &app{
-		cfg: cfg,
+		cfg:   cfg,
+		store: NewStore(),
 	}
 
 	app.initTui()

@@ -3,15 +3,14 @@ package grpc
 import (
 	"bytes"
 	"context"
-	"github.com/e1m0re/passman/internal/model"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 
-	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
+	"github.com/e1m0re/passman/internal/model"
 	"github.com/e1m0re/passman/proto"
 )
 
@@ -31,17 +30,16 @@ func (client *StoreClient) GetItemsList(ctx context.Context) ([]*model.DatumInfo
 	result := make([]*model.DatumInfo, response.GetCount())
 	for idx, datum := range response.GetItemsInfo() {
 		result[idx] = &model.DatumInfo{
-			TypeID:   model.DatumTypeID(datum.ItemType),
-			UserID:   1,
-			File:     datum.File,
+			File:     datum.Id,
 			Checksum: datum.Checksum,
+			Metadata: datum.Metadata,
 		}
 	}
 	return result, nil
 }
 
 // UploadItem send file to server.
-func (client *StoreClient) UploadItem(ctx context.Context, id string) error {
+func (client *StoreClient) UploadItem(ctx context.Context, id string, metadata string) error {
 	filePath := filepath.Join(client.workDir, id)
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -65,8 +63,7 @@ func (client *StoreClient) UploadItem(ctx context.Context, id string) error {
 		}
 
 		chunk := buf[:num]
-		id := uuid.New().String()
-		if err := stream.Send(&proto.UploadItemRequest{Id: id, Chunk: chunk}); err != nil {
+		if err := stream.Send(&proto.UploadItemRequest{Id: id, Chunk: chunk, Metadata: metadata}); err != nil {
 			return err
 		}
 

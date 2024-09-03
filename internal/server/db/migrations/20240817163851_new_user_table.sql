@@ -13,7 +13,6 @@ CREATE TABLE users
 CREATE TABLE users_data
 (
     id       SERIAL PRIMARY KEY NOT NULL,
-    "type"   INT                NOT NULL,
     "user"   INT                NOT NULL REFERENCES users,
     metadata varchar(255)       NOT NULL,
     file     varchar(255)       NOT NULL,

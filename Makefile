@@ -11,6 +11,7 @@ build-server:
 	go build -o bin/server cmd/server/*go
 
 build-client:
+	rm ./bin/* ;\
 	GOOS=windows GOARCH=386 go build -o bin/client_win_x86.exe cmd/client/main.go ;\
 	GOOS=windows GOARCH=amd64 go build -o bin/client_win_x64.exe cmd/client/main.go ;\
 	GOOS=linux GOARCH=amd64 go build -o bin/client_linux_x64 cmd/client/main.go ;\
