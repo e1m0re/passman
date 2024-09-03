@@ -4,8 +4,11 @@ import (
 	"io"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/pressly/goose/v3"
+
+	"github.com/e1m0re/passman/internal/server/db/migrations"
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.44.2 --name=DBService
@@ -31,6 +34,28 @@ func (d dbService) GetDB() *sqlx.DB {
 
 var _ DBService = (*dbService)(nil)
 
+func (d dbService) migrate(url string) error {
+	stdlib.GetDefaultDriver()
+
+	db, err := goose.OpenDBWithDriver("pgx", url)
+	if err != nil {
+		return err
+	}
+
+	goose.SetBaseFS(&migrations.Content)
+	err = goose.SetDialect("postgres")
+	if err != nil {
+		return err
+	}
+
+	err = goose.Up(db, ".")
+	if err != nil {
+		return err
+	}
+
+	return db.Close()
+}
+
 // NewDBService initiates new instance of DBService.
 func NewDBService(conf DatabaseConfig) (DBService, error) {
 	db, err := sqlx.Open(conf.Driver, conf.Url)
@@ -45,7 +70,11 @@ func NewDBService(conf DatabaseConfig) (DBService, error) {
 		return nil, err
 	}
 
-	return &dbService{
-		db,
-	}, nil
+	service := &dbService{db}
+
+	if err = service.migrate(conf.Url); err != nil {
+		return nil, err
+	}
+
+	return service, nil
 }

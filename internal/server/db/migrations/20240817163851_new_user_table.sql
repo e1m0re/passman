@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 SELECT 'up SQL query';
 -- +goose StatementEnd
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
     id       SERIAL PRIMARY KEY NOT NULL,
     username VARCHAR(255)       NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE users
     UNIQUE (username)
 );
 
-CREATE TABLE users_data
+CREATE TABLE IF NOT EXISTS users_data
 (
     id       SERIAL PRIMARY KEY NOT NULL,
     "user"   INT                NOT NULL REFERENCES users,
