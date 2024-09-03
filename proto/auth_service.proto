@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package protobuf.auth.service;
+
+option go_package = "auth/proto";
+
+enum StatusCode {
+  EC_UNKNOWN = 0;
+  SUCCESS = 1;
+  INVALID_REQUEST = 2;
+  DUPLICATE_USER = 3;
+}
+
+message SignUpRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message SignUpResponse {
+  StatusCode status = 1;
+  string message = 3;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  StatusCode status = 1;
+  string access_token = 2;
+}
+
+service AuthService {
+  rpc SignUp(SignUpRequest) returns (SignUpResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+}

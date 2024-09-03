@@ -1,0 +1,28 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - passman-data:/data
+    depends_on:
+      - db
+    environment:
+      - DATABASE_DSN=${DATABASE_DSN}
+      - STORAGE_PATH=${STORAGE_PATH}
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+
+volumes:
+  passman-data:
+  postgres-db:
